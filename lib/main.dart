@@ -28,6 +28,7 @@ class Book {
   final String category;
   final double rating;
   final int pages;
+  final String cover; // path gambar cover di folder assets
   bool isFavorite;
 
   Book({
@@ -36,6 +37,7 @@ class Book {
     required this.category,
     required this.rating,
     required this.pages,
+    required this.cover,
     this.isFavorite = false,
   });
 }
@@ -54,14 +56,14 @@ class _HomePageState extends State<HomePage> {
   final List<String> _categories = ['All Books', 'Fiction', 'Non-Fiction', 'Self-Help'];
 
   final List<Book> _favoriteBooks = [
-    Book(title: 'The Creative Act', author: 'Rick Rubin', category: 'Self-Help', rating: 4.5, pages: 400),
-    Book(title: 'Sapiens', author: 'Yuval Noah Harari', category: 'Non-Fiction', rating: 4.6, pages: 443),
+    Book(title: 'The Creative Act', author: 'Rick Rubin', category: 'Self-Help', rating: 4.5, pages: 400, cover: 'assets/images/thecreativeart.jpg'),
+    Book(title: 'Sapiens', author: 'Yuval Noah Harari', category: 'Non-Fiction', rating: 4.6, pages: 443, cover: 'assets/images/sapiens.jpg'),
   ];
 
   final List<Book> _newBooks = [
-    Book(title: 'Atomic Habits', author: 'James Clear', category: 'Self-Help', rating: 4.8, pages: 320),
-    Book(title: 'Dune', author: 'Frank Herbert', category: 'Sci-Fi', rating: 4.7, pages: 600),
-    Book(title: 'Tomorrow, and Tomorrow, and Tomorrow', author: 'Gabrielle Zevin', category: 'Fiction', rating: 4.6, pages: 416),
+    Book(title: 'Atomic Habits', author: 'James Clear', category: 'Self-Help', rating: 4.8, pages: 320, cover: 'assets/images/atomichabits.jpg'),
+    Book(title: 'Dune', author: 'Frank Herbert', category: 'Sci-Fi', rating: 4.7, pages: 600, cover: 'assets/images/dune.png'),
+    Book(title: 'Tomorrow, and Tomorrow, and Tomorrow', author: 'Gabrielle Zevin', category: 'Fiction', rating: 4.6, pages: 416, cover: 'assets/images/tomorrow.jpg'),
   ];
 
   @override
@@ -176,15 +178,7 @@ class _HomePageState extends State<HomePage> {
             ),
             child: Row(
               children: [
-                Container(
-                  width: 60,
-                  height: 90,
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade300,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  // ini buat Image.asset('assets/images/covers/xxx.jpg') cover sudah ada
-                ),
+                _buildCover(book.cover, 60, 90),
                 const SizedBox(width: 10),
                 Expanded(
                   child: Column(
@@ -241,6 +235,25 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  Widget _buildCover(String path, double width, double height) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(8),
+      child: Image.asset(
+        path,
+        width: width,
+        height: height,
+        fit: BoxFit.cover,
+        // kalau gambar tidak ketemu, tampil kotak abu-abu dengan ikon buku
+        errorBuilder: (_, _, _) => Container(
+          width: width,
+          height: height,
+          color: Colors.grey.shade300,
+          child: const Icon(Icons.menu_book, color: Colors.grey),
+        ),
+      ),
+    );
+  }
+
   Widget _buildNewBooksList() {
     return Column(
       children: _newBooks.map((book) => _buildBookCard(book)).toList(),
@@ -265,15 +278,7 @@ class _HomePageState extends State<HomePage> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            width: 64,
-            height: 96,
-            decoration: BoxDecoration(
-              color: Colors.grey.shade300,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            // ini buat Image.asset('assets/images/covers/xxx.jpg') cover sudah ada
-          ),
+          _buildCover(book.cover, 64, 96),
           const SizedBox(width: 14),
           Expanded(
             child: Column(

@@ -59,6 +59,9 @@ flutter:
   # the material Icons class.
   uses-material-design: true
 
+  assets:
+  - assets/images/
+
 flutter_launcher_icons:
   android: true
   image_path: "assets/logomybookgwehj.png"
