@@ -43,25 +43,29 @@ class _LoginPageState extends State<LoginPage> {
                 children: [
                   const SizedBox(height: 30),
                   Center(
-                    child: Image.asset(
-                      'assets/logomybookgwehj.png',
-                      height: 90,
-                      fit: BoxFit.contain,
-                      errorBuilder: (_, _, _) => Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.menu_book_rounded,
-                              color: primary, size: 30),
-                          const SizedBox(width: 8),
-                          Text(
-                            'MyBook',
-                            style: TextStyle(
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                                color: primary),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Image.asset(
+                          'assets/logomybookgweh-nobg.png',
+                          height: 90,
+                          fit: BoxFit.contain,
+                          errorBuilder: (_, _, _) => Icon(
+                            Icons.menu_book_rounded,
+                            color: primary,
+                            size: 44,
                           ),
-                        ],
-                      ),
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          'My Buku Gue',
+                          style: TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                            color: primary,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                   const SizedBox(height: 36),

@@ -50,25 +50,29 @@ class _RegisterPageState extends State<RegisterPage> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Center(
-                  child: Image.asset(
-                    'assets/logomybookgwehj.png',
-                    height: 80,
-                    fit: BoxFit.contain,
-                    errorBuilder: (_, _, _) => Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.menu_book_rounded,
-                            color: primary, size: 26),
-                        const SizedBox(width: 8),
-                        Text(
-                          'MyBook',
-                          style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                              color: primary),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Image.asset(
+                        'assets/logomybookgweh-nobg.png',
+                        height: 80,
+                        fit: BoxFit.contain,
+                        errorBuilder: (_, _, _) => Icon(
+                          Icons.menu_book_rounded,
+                          color: primary,
+                          size: 36,
                         ),
-                      ],
-                    ),
+                      ),
+                      const SizedBox(height: 10),
+                      Text(
+                        'My Buku Gue',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: primary,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
                 const SizedBox(height: 12),
