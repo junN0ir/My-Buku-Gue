@@ -57,12 +57,17 @@ class _LoginPageState extends State<LoginPage> {
                           ),
                         ),
                         const SizedBox(height: 12),
-                        Text(
-                          'My Buku Gue',
-                          style: TextStyle(
-                            fontSize: 22,
-                            fontWeight: FontWeight.bold,
-                            color: primary,
+                        Image.asset(
+                          'assets/LogoTulisan-nobg.png',
+                          height: 58,
+                          fit: BoxFit.contain,
+                          errorBuilder: (_, _, _) => Text(
+                            'My Buku Gue',
+                            style: TextStyle(
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
+                              color: primary,
+                            ),
                           ),
                         ),
                       ],
@@ -201,18 +206,14 @@ class _GoogleIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 18,
-      height: 18,
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        border: Border.all(color: Colors.grey.shade400),
-      ),
-      child: const Text(
-        'G',
-        style: TextStyle(
-            fontSize: 11, fontWeight: FontWeight.bold, color: Colors.black54),
+    return Image.asset(
+      'assets/GoogleLogo.png',
+      width: 20,
+      height: 20,
+      fit: BoxFit.contain,
+      errorBuilder: (_, _, _) => const Icon(
+        Icons.g_mobiledata_rounded,
+        size: 24,
       ),
     );
   }

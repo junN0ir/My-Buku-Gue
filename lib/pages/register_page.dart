@@ -64,12 +64,17 @@ class _RegisterPageState extends State<RegisterPage> {
                         ),
                       ),
                       const SizedBox(height: 10),
-                      Text(
-                        'My Buku Gue',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: primary,
+                      Image.asset(
+                        'assets/LogoTulisan-nobg.png',
+                        height: 50,
+                        fit: BoxFit.contain,
+                        errorBuilder: (_, _, _) => Text(
+                          'My Buku Gue',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: primary,
+                          ),
                         ),
                       ),
                     ],
