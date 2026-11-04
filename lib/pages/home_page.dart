@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../database/database_helper.dart';
 import '../models/book.dart';
 import 'book_detail_page.dart';
 import 'favorite_page.dart';
@@ -6,7 +7,9 @@ import 'profile_page.dart';
 import 'search_page.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+  final String? userEmail;
+
+  const HomePage({super.key, this.userEmail});
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -16,100 +19,34 @@ class _HomePageState extends State<HomePage> {
   int _selectedNavIndex = 0;
   bool _autoFocusSearch = false;
   String _selectedCategory = 'Semua Buku';
+  bool _isLoading = true;
 
-  final List<String> _categories = [
-    'Semua Buku',
-    'Fiction',
-    'Non-Fiction',
-    'Self-Help',
-    'Sci-Fi'
-  ];
+  List<String> _categories = ['Semua Buku'];
+  List<Book> _allBooks = [];
 
-  final List<Book> _favoriteBooks = [
-    Book(
-      title: 'The Creative Act',
-      author: 'Rick Rubin',
-      category: 'Self-Help',
-      rating: 4.5,
-      pages: 400,
-      cover: 'assets/images/thecreativeart.jpg',
-      publisher: 'Penguin Press',
-      year: 2023,
-      synopsis:
-          'Buku ini mengajak pembaca memandang proses berkarya sebagai jalan hidup, bukan sekadar teknik. Rick Rubin membagikan cara berpikir untuk menangkap ide, mengatasi kebuntuan, dan tetap terbuka pada hal-hal tak terduga selama berkarya.',
-      authorBio:
-          'Rick Rubin adalah produser musik asal Amerika Serikat yang telah bekerja dengan banyak musisi lintas genre selama puluhan tahun. Ia dikenal karena pendekatan kreatifnya yang sederhana namun mendalam.',
-      isFavorite: true,
-    ),
-    Book(
-      title: 'Sapiens',
-      author: 'Yuval Noah Harari',
-      category: 'Non-Fiction',
-      rating: 4.6,
-      pages: 443,
-      cover: 'assets/images/sapiens.jpg',
-      publisher: 'Harper',
-      year: 2015,
-      synopsis:
-          'Buku ini menelusuri perjalanan panjang manusia, mulai dari masa pemburu-peramu hingga terbentuknya peradaban modern. Harari mengajak pembaca melihat bagaimana bahasa, kepercayaan, dan kerja sama membentuk dunia yang kita kenal sekarang.',
-      authorBio:
-          'Yuval Noah Harari adalah sejarawan dan penulis asal Israel yang fokus meneliti sejarah besar umat manusia. Karya-karyanya banyak membahas masa lalu, masa kini, dan masa depan peradaban manusia.',
-      isFavorite: true,
-    ),
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _loadData();
+  }
 
-  final List<Book> _newBooks = [
-    Book(
-      title: 'Atomic Habits',
-      author: 'James Clear',
-      category: 'Self-Help',
-      rating: 4.8,
-      pages: 320,
-      cover: 'assets/images/atomichabits.jpg',
-      publisher: 'Avery',
-      year: 2018,
-      synopsis:
-          'Buku ini membahas bagaimana perubahan kecil yang dilakukan secara konsisten dapat membentuk kebiasaan dan memberikan dampak besar dalam jangka panjang.',
-      authorBio:
-          'James Clear adalah penulis asal Amerika Serikat yang berfokus pada kebiasaan, pengambilan keputusan, dan pengembangan diri. Ia dikenal melalui buku Atomic Habits.',
-    ),
-    Book(
-      title: 'Dune',
-      author: 'Frank Herbert',
-      category: 'Sci-Fi',
-      rating: 4.7,
-      pages: 600,
-      cover: 'assets/images/dune.png',
-      publisher: 'Chilton Books',
-      year: 1965,
-      synopsis:
-          'Kisah ini berlatar di planet gurun Arrakis, satu-satunya sumber rempah paling berharga di alam semesta. Seorang pemuda bangsawan terseret ke dalam perebutan kekuasaan, politik, dan takdir yang jauh lebih besar dari dirinya.',
-      authorBio:
-          'Frank Herbert adalah penulis fiksi ilmiah asal Amerika Serikat. Ia dikenal luas lewat seri Dune yang membahas ekologi, agama, dan politik lewat balutan cerita petualangan luar akasa.',
-    ),
-    Book(
-      title: 'Tomorrow, and Tomorrow, and Tomorrow',
-      author: 'Gabrielle Zevin',
-      category: 'Fiction',
-      rating: 4.6,
-      pages: 416,
-      cover: 'assets/images/tomorrow.jpg',
-      publisher: 'Knopf',
-      year: 2022,
-      synopsis:
-          'Cerita ini mengikuti persahabatan dua perancang video game sepanjang bertahun-tahun, melewati pasang surut kreativitas, kesuksesan, dan kehilangan, sambil membangun dunia-dunia baru lewat permainan yang mereka ciptakan bersama.',
-      authorBio:
-          'Gabrielle Zevin adalah penulis asal Amerika Serikat yang karyanya banyak mengangkat tema persahabatan, identitas, dan kreativitas dalam balutan cerita yang hangat.',
-    ),
-  ];
-
-  List<Book> get _allBooks => [..._favoriteBooks, ..._newBooks];
+  Future<void> _loadData() async {
+    final books = await DatabaseHelper.instance.getBooks();
+    final genres = await DatabaseHelper.instance.getGenres();
+    if (mounted) {
+      setState(() {
+        _allBooks = books;
+        _categories = ['Semua Buku', ...genres];
+        _isLoading = false;
+      });
+    }
+  }
 
   void _openDetail(Book book) {
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => BookDetailPage(book: book)),
-    ).then((_) => setState(() {}));
+    ).then((_) => _loadData());
   }
 
   @override
@@ -120,21 +57,27 @@ class _HomePageState extends State<HomePage> {
       currentBody = SearchPage(
         books: _allBooks,
         autoFocus: _autoFocusSearch,
-        onChanged: () => setState(() {}),
+        onChanged: _loadData,
       );
     } else if (_selectedNavIndex == 2) {
       currentBody = FavoritePage(
         favoriteBooks: _allBooks.where((b) => b.isFavorite).toList(),
-        onChanged: () => setState(() {}),
+        onChanged: _loadData,
         onFindBooks: () => setState(() {
           _autoFocusSearch = false;
           _selectedNavIndex = 0;
         }),
       );
     } else if (_selectedNavIndex == 3) {
+      final email = widget.userEmail ?? 'junnior@email.com';
+      final username = email.split('@').first;
+      final capitalized = username.isNotEmpty
+          ? username[0].toUpperCase() + username.substring(1)
+          : 'Pengguna';
+
       currentBody = ProfilePage(
-        email: 'junnior@email.com',
-        username: 'Junnior',
+        email: email,
+        username: capitalized,
         favoriteBooksCount: _allBooks.where((b) => b.isFavorite).length,
       );
     } else {
@@ -148,6 +91,10 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildHomeContent() {
+    if (_isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
     return SafeArea(
       child: ListView(
         padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
@@ -171,19 +118,26 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildHeader() {
+    final email = widget.userEmail ?? 'junnior@email.com';
+    final username = email.split('@').first;
+    final displayName = username.isNotEmpty
+        ? username[0].toUpperCase() + username.substring(1)
+        : 'Pengguna';
+    final initial = displayName.isNotEmpty ? displayName[0].toUpperCase() : 'U';
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        const Text(
-          'Selamat datang, Junnior',
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        Text(
+          'Selamat datang, $displayName',
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         ),
         CircleAvatar(
           radius: 20,
           backgroundColor: Colors.blue.shade50,
-          child: const Text('J',
+          child: Text(initial,
               style:
-                  TextStyle(color: Colors.blue, fontWeight: FontWeight.bold)),
+                  const TextStyle(color: Colors.blue, fontWeight: FontWeight.bold)),
         ),
       ],
     );
@@ -457,7 +411,10 @@ class _HomePageState extends State<HomePage> {
                 book.isFavorite ? Icons.star : Icons.star_border,
                 color: book.isFavorite ? Colors.amber : Colors.grey.shade400,
               ),
-              onPressed: () => setState(() => book.isFavorite = !book.isFavorite),
+              onPressed: () async {
+                await DatabaseHelper.instance.toggleFavorite(book);
+                _loadData();
+              },
             ),
           ],
         ),

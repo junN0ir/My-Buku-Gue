@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../database/database_helper.dart';
 import '../models/book.dart';
 import 'book_detail_page.dart';
 
@@ -277,8 +278,8 @@ class _FavoritePageState extends State<FavoritePage> {
                 book.isFavorite ? Icons.star : Icons.star_border,
                 color: book.isFavorite ? Colors.amber : Colors.grey.shade400,
               ),
-              onPressed: () {
-                setState(() => book.isFavorite = !book.isFavorite);
+              onPressed: () async {
+                await DatabaseHelper.instance.toggleFavorite(book);
                 widget.onChanged();
               },
             ),

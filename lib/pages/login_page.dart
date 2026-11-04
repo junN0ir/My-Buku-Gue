@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../database/database_helper.dart';
 import 'home_page.dart';
 import 'register_page.dart';
 
@@ -21,11 +22,32 @@ class _LoginPageState extends State<LoginPage> {
     super.dispose();
   }
 
-  void _masuk() {
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => const HomePage()),
-    );
+  Future<void> _masuk() async {
+    final email = _emailController.text.trim();
+    final password = _passwordController.text;
+
+    if (email.isEmpty || password.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Email dan kata sandi wajib diisi')),
+      );
+      return;
+    }
+
+    final isValid = await DatabaseHelper.instance.login(email, password);
+    if (!mounted) return;
+
+    if (isValid) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => HomePage(userEmail: email),
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Email atau kata sandi salah')),
+      );
+    }
   }
 
   @override

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../database/database_helper.dart';
 import '../models/book.dart';
 
 class BookDetailPage extends StatefulWidget {
@@ -89,8 +90,10 @@ class _BookDetailPageState extends State<BookDetailPage> {
                   ),
                   const Spacer(),
                   OutlinedButton.icon(
-                    onPressed: () =>
-                        setState(() => book.isFavorite = !book.isFavorite),
+                    onPressed: () async {
+                      await DatabaseHelper.instance.toggleFavorite(book);
+                      setState(() {});
+                    },
                     icon: Icon(
                       book.isFavorite ? Icons.star : Icons.star_border,
                       size: 18,
