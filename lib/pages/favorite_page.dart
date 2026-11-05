@@ -223,18 +223,31 @@ class _FavoritePageState extends State<FavoritePage> {
           children: [
             ClipRRect(
               borderRadius: BorderRadius.circular(8),
-              child: Image.asset(
-                book.cover,
-                width: 64,
-                height: 96,
-                fit: BoxFit.cover,
-                errorBuilder: (_, _, _) => Container(
-                  width: 64,
-                  height: 96,
-                  color: Colors.grey.shade300,
-                  child: const Icon(Icons.menu_book, color: Colors.grey),
-                ),
-              ),
+              child: book.cover.startsWith('http')
+                  ? Image.network(
+                      book.cover,
+                      width: 64,
+                      height: 96,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, _, _) => Container(
+                        width: 64,
+                        height: 96,
+                        color: Colors.grey.shade300,
+                        child: const Icon(Icons.menu_book, color: Colors.grey),
+                      ),
+                    )
+                  : Image.asset(
+                      book.cover,
+                      width: 64,
+                      height: 96,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, _, _) => Container(
+                        width: 64,
+                        height: 96,
+                        color: Colors.grey.shade300,
+                        child: const Icon(Icons.menu_book, color: Colors.grey),
+                      ),
+                    ),
             ),
             const SizedBox(width: 14),
             Expanded(

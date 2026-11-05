@@ -40,6 +40,17 @@ class _HomePageState extends State<HomePage> {
         _isLoading = false;
       });
     }
+    _syncCovers();
+  }
+
+  Future<void> _syncCovers() async {
+    await DatabaseHelper.instance.syncCoversFromApi();
+    final updated = await DatabaseHelper.instance.getBooks();
+    if (mounted) {
+      setState(() {
+        _allBooks = updated;
+      });
+    }
   }
 
   void _openDetail(Book book) {
@@ -307,18 +318,31 @@ class _HomePageState extends State<HomePage> {
   Widget _buildCover(String path, double width, double height) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(8),
-      child: Image.asset(
-        path,
-        width: width,
-        height: height,
-        fit: BoxFit.cover,
-        errorBuilder: (_, _, _) => Container(
-          width: width,
-          height: height,
-          color: Colors.grey.shade300,
-          child: const Icon(Icons.menu_book, color: Colors.grey),
-        ),
-      ),
+      child: path.startsWith('http')
+          ? Image.network(
+              path,
+              width: width,
+              height: height,
+              fit: BoxFit.cover,
+              errorBuilder: (_, _, _) => Container(
+                width: width,
+                height: height,
+                color: Colors.grey.shade300,
+                child: const Icon(Icons.menu_book, color: Colors.grey),
+              ),
+            )
+          : Image.asset(
+              path,
+              width: width,
+              height: height,
+              fit: BoxFit.cover,
+              errorBuilder: (_, _, _) => Container(
+                width: width,
+                height: height,
+                color: Colors.grey.shade300,
+                child: const Icon(Icons.menu_book, color: Colors.grey),
+              ),
+            ),
     );
   }
 

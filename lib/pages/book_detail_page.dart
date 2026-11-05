@@ -47,18 +47,31 @@ class _BookDetailPageState extends State<BookDetailPage> {
                   ),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(8),
-                    child: Image.asset(
-                      book.cover,
-                      height: 190,
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, _, _) => Container(
-                        height: 190,
-                        width: 130,
-                        color: Colors.grey.shade300,
-                        child: const Icon(Icons.menu_book,
-                            color: Colors.grey, size: 40),
-                      ),
-                    ),
+                    child: book.cover.startsWith('http')
+                        ? Image.network(
+                            book.cover,
+                            height: 190,
+                            fit: BoxFit.cover,
+                            errorBuilder: (_, _, _) => Container(
+                              height: 190,
+                              width: 130,
+                              color: Colors.grey.shade300,
+                              child: const Icon(Icons.menu_book,
+                                  color: Colors.grey, size: 40),
+                            ),
+                          )
+                        : Image.asset(
+                            book.cover,
+                            height: 190,
+                            fit: BoxFit.cover,
+                            errorBuilder: (_, _, _) => Container(
+                              height: 190,
+                              width: 130,
+                              color: Colors.grey.shade300,
+                              child: const Icon(Icons.menu_book,
+                                  color: Colors.grey, size: 40),
+                            ),
+                          ),
                   ),
                 ),
               ),

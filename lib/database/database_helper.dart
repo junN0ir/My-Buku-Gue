@@ -1,13 +1,14 @@
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 import '../models/book.dart';
+import '../services/book_api_service.dart';
 
 class DatabaseHelper {
   static final DatabaseHelper instance = DatabaseHelper._internal();
   static Database? _database;
 
   static const _dbName = 'mybuku.db';
-  static const _dbVersion = 1;
+  static const _dbVersion = 2;
 
   DatabaseHelper._internal();
 
@@ -26,7 +27,23 @@ class DatabaseHelper {
         await db.execute('PRAGMA foreign_keys = ON');
       },
       onCreate: _onCreate,
+      onUpgrade: _onUpgrade,
     );
+  }
+
+  Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
+    if (oldVersion < 2) {
+      await db.rawUpdate(
+          "UPDATE buku SET cover = 'https://covers.openlibrary.org/b/id/13316390-M.jpg' WHERE judul_buku = 'The Creative Act'");
+      await db.rawUpdate(
+          "UPDATE buku SET cover = 'https://covers.openlibrary.org/b/id/8634250-M.jpg' WHERE judul_buku = 'Sapiens'");
+      await db.rawUpdate(
+          "UPDATE buku SET cover = 'https://covers.openlibrary.org/b/id/12539702-M.jpg' WHERE judul_buku = 'Atomic Habits'");
+      await db.rawUpdate(
+          "UPDATE buku SET cover = 'https://covers.openlibrary.org/b/id/11481354-M.jpg' WHERE judul_buku = 'Dune'");
+      await db.rawUpdate(
+          "UPDATE buku SET cover = 'https://covers.openlibrary.org/b/id/12859975-M.jpg' WHERE judul_buku = 'Tomorrow, and Tomorrow, and Tomorrow'");
+    }
   }
 
   Future<void> _onCreate(Database db, int version) async {
@@ -125,7 +142,7 @@ class DatabaseHelper {
           'Buku ini mengajak pembaca memandang proses berkarya sebagai jalan hidup, bukan sekadar teknik. Rick Rubin membagikan cara berpikir untuk menangkap ide, mengatasi kebuntuan, dan tetap terbuka pada hal-hal tak terduga selama berkarya.',
       'tahun_terbit': 2023,
       'pages': 400,
-      'cover': 'assets/images/thecreativeart.jpg',
+      'cover': 'https://covers.openlibrary.org/b/id/13316390-M.jpg',
       'rating': 4.5,
     });
 
@@ -138,7 +155,7 @@ class DatabaseHelper {
           'Buku ini menelusuri perjalanan panjang manusia, mulai dari masa pemburu-peramu hingga terbentuknya peradaban modern. Harari mengajak pembaca melihat bagaimana bahasa, kepercayaan, dan kerja sama membentuk dunia yang kita kenal sekarang.',
       'tahun_terbit': 2015,
       'pages': 443,
-      'cover': 'assets/images/sapiens.jpg',
+      'cover': 'https://covers.openlibrary.org/b/id/8634250-M.jpg',
       'rating': 4.6,
     });
 
@@ -151,7 +168,7 @@ class DatabaseHelper {
           'Buku ini membahas bagaimana perubahan kecil yang dilakukan secara konsisten dapat membentuk kebiasaan dan memberikan dampak besar dalam jangka panjang.',
       'tahun_terbit': 2018,
       'pages': 320,
-      'cover': 'assets/images/atomichabits.jpg',
+      'cover': 'https://covers.openlibrary.org/b/id/12539702-M.jpg',
       'rating': 4.8,
     });
 
@@ -164,7 +181,7 @@ class DatabaseHelper {
           'Kisah ini berlatar di planet gurun Arrakis, satu-satunya sumber rempah paling berharga di alam semesta. Seorang pemuda bangsawan terseret ke dalam perebutan kekuasaan, politik, dan takdir yang jauh lebih besar dari dirinya.',
       'tahun_terbit': 1965,
       'pages': 600,
-      'cover': 'assets/images/dune.png',
+      'cover': 'https://covers.openlibrary.org/b/id/11481354-M.jpg',
       'rating': 4.7,
     });
 
@@ -177,7 +194,7 @@ class DatabaseHelper {
           'Cerita ini mengikuti persahabatan dua perancang video game sepanjang bertahun-tahun, melewati pasang surut kreativitas, kesuksesan, dan kehilangan, sambil membangun dunia-dunia baru lewat permainan yang mereka ciptakan bersama.',
       'tahun_terbit': 2022,
       'pages': 416,
-      'cover': 'assets/images/tomorrow.jpg',
+      'cover': 'https://covers.openlibrary.org/b/id/12859975-M.jpg',
       'rating': 4.6,
     });
 
@@ -375,6 +392,26 @@ class DatabaseHelper {
     return true;
   }
 
+  Future<void> syncCoversFromApi() async {
+    final apiService = BookApiService();
+    final books = await getBooks();
+    final db = await database;
+
+    for (final book in books) {
+      if (book.id != null) {
+        final remoteCover = await apiService.fetchCoverUrl(book.title);
+        if (remoteCover != null && remoteCover.isNotEmpty) {
+          await db.update(
+            'buku',
+            {'cover': remoteCover},
+            where: 'id_buku = ?',
+            whereArgs: [book.id],
+          );
+        }
+      }
+    }
+  }
+
   Future<void> insertBook({
     required String judul,
     required String namaGenre,
@@ -387,6 +424,14 @@ class DatabaseHelper {
     double rating = 4.5,
   }) async {
     final db = await database;
+
+    String finalCover = cover;
+    if (finalCover.isEmpty || !finalCover.startsWith('http')) {
+      final remoteCover = await BookApiService().fetchCoverUrl(judul);
+      if (remoteCover != null && remoteCover.isNotEmpty) {
+        finalCover = remoteCover;
+      }
+    }
 
     int idGenre;
     final genreRow = await db.query('genre', where: 'nama_genre = ?', whereArgs: [namaGenre], limit: 1);
@@ -415,7 +460,7 @@ class DatabaseHelper {
       'sinopsis': sinopsis,
       'tahun_terbit': tahunTerbit,
       'pages': pages,
-      'cover': cover,
+      'cover': finalCover,
       'rating': rating,
     });
   }
