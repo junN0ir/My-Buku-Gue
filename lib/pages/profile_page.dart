@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../database/database_helper.dart';
 import 'login_page.dart';
 
 class ProfilePage extends StatelessWidget {
@@ -30,6 +31,7 @@ class ProfilePage extends StatelessWidget {
           ),
           FilledButton(
             onPressed: () {
+              DatabaseHelper.instance.logout();
               Navigator.pop(ctx);
               Navigator.pushAndRemoveUntil(
                 context,
@@ -81,6 +83,9 @@ class ProfilePage extends StatelessWidget {
   }
 
   Widget _buildProfileCard(String name) {
+    final trimmed = name.trim();
+    final initial = trimmed.isNotEmpty ? trimmed[0].toUpperCase() : 'U';
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
@@ -100,9 +105,9 @@ class ProfilePage extends StatelessWidget {
           CircleAvatar(
             radius: 42,
             backgroundColor: Colors.blue.shade50,
-            child: const Text(
-              'J',
-              style: TextStyle(
+            child: Text(
+              initial,
+              style: const TextStyle(
                 fontSize: 32,
                 fontWeight: FontWeight.bold,
                 color: Colors.blue,

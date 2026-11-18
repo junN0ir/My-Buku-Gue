@@ -24,3 +24,14 @@ class BookApiService {
     return null;
   }
 }
+
+
+
+
+
+
+
+
+
+
+//https://openlibrary.org/search.json?title={judul_buku}&limit=1

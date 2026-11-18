@@ -28,19 +28,35 @@ class Book {
   });
 
   factory Book.fromMap(Map<String, dynamic> map) {
+    final genreData = map['genre'] as Map<String, dynamic>?;
+    final penulisData = map['penulis'] as Map<String, dynamic>?;
+    final favoritData = map['favorit'];
+
+    bool fav = false;
+    if (favoritData is List) {
+      fav = favoritData.isNotEmpty;
+    } else if (map['is_favorite'] is bool) {
+      fav = map['is_favorite'] as bool;
+    } else if (map['is_favorite'] is int) {
+      fav = (map['is_favorite'] as int) == 1;
+    }
+
     return Book(
       id: map['id_buku'] as int?,
       title: map['judul_buku'] as String? ?? '',
-      author: map['nama_penulis'] as String? ?? 'Penulis Umum',
-      category: map['nama_genre'] as String? ?? 'General',
+      author: (penulisData?['nama_penulis'] ?? map['nama_penulis']) as String? ??
+          'Penulis Umum',
+      category: (genreData?['nama_genre'] ?? map['nama_genre']) as String? ??
+          'General',
       rating: (map['rating'] as num?)?.toDouble() ?? 4.5,
       pages: map['pages'] as int? ?? 200,
       cover: map['cover'] as String? ?? 'assets/images/atomichabits.jpg',
       publisher: map['penerbit'] as String? ?? '',
       year: map['tahun_terbit'] as int? ?? 2023,
       synopsis: map['sinopsis'] as String? ?? '',
-      authorBio: map['biografi'] as String? ?? '',
-      isFavorite: (map['is_favorite'] as int? ?? 0) == 1,
+      authorBio:
+          (penulisData?['biografi'] ?? map['biografi']) as String? ?? '',
+      isFavorite: fav,
     );
   }
 

@@ -26,6 +26,11 @@ class _RegisterPageState extends State<RegisterPage> {
     super.dispose();
   }
 
+  bool _isValidEmail(String email) {
+    final regex = RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
+    return regex.hasMatch(email);
+  }
+
   Future<void> _daftar() async {
     final email = _emailController.text.trim();
     final password = _passwordController.text;
@@ -38,6 +43,15 @@ class _RegisterPageState extends State<RegisterPage> {
       return;
     }
 
+    if (!_isValidEmail(email)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Format email tidak valid (contoh: nama@email.com)'),
+        ),
+      );
+      return;
+    }
+
     if (password != confirm) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Konfirmasi kata sandi tidak cocok')),
@@ -45,17 +59,24 @@ class _RegisterPageState extends State<RegisterPage> {
       return;
     }
 
-    final success = await DatabaseHelper.instance.register(email, password);
-    if (!mounted) return;
+    try {
+      final success = await DatabaseHelper.instance.register(email, password);
+      if (!mounted) return;
 
-    if (success) {
+      if (success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Pendaftaran berhasil! Silakan masuk')),
+        );
+        Navigator.pop(context);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Email sudah terdaftar')),
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Pendaftaran berhasil! Silakan masuk')),
-      );
-      Navigator.pop(context);
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Email sudah terdaftar')),
+        SnackBar(content: Text('Gagal daftar: $e')),
       );
     }
   }

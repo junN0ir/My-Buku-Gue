@@ -31,26 +31,37 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> _loadData() async {
-    final books = await DatabaseHelper.instance.getBooks();
-    final genres = await DatabaseHelper.instance.getGenres();
-    if (mounted) {
-      setState(() {
-        _allBooks = books;
-        _categories = ['Semua Buku', ...genres];
-        _isLoading = false;
-      });
+    try {
+      await DatabaseHelper.instance.ensureUserLoaded(widget.userEmail);
+      final books = await DatabaseHelper.instance.getBooks();
+      final genres = await DatabaseHelper.instance.getGenres();
+      if (mounted) {
+        setState(() {
+          _allBooks = books;
+          _categories = ['Semua Buku', ...genres];
+          _isLoading = false;
+        });
+      }
+      _syncCovers();
+    } catch (_) {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
-    _syncCovers();
   }
 
   Future<void> _syncCovers() async {
-    await DatabaseHelper.instance.syncCoversFromApi();
-    final updated = await DatabaseHelper.instance.getBooks();
-    if (mounted) {
-      setState(() {
-        _allBooks = updated;
-      });
-    }
+    try {
+      await DatabaseHelper.instance.syncCoversFromApi();
+      final updated = await DatabaseHelper.instance.getBooks();
+      if (mounted) {
+        setState(() {
+          _allBooks = updated;
+        });
+      }
+    } catch (_) {}
   }
 
   void _openDetail(Book book) {

@@ -22,6 +22,11 @@ class _LoginPageState extends State<LoginPage> {
     super.dispose();
   }
 
+  bool _isValidEmail(String email) {
+    final regex = RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
+    return regex.hasMatch(email);
+  }
+
   Future<void> _masuk() async {
     final email = _emailController.text.trim();
     final password = _passwordController.text;
@@ -33,19 +38,35 @@ class _LoginPageState extends State<LoginPage> {
       return;
     }
 
-    final isValid = await DatabaseHelper.instance.login(email, password);
-    if (!mounted) return;
-
-    if (isValid) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => HomePage(userEmail: email),
+    if (!_isValidEmail(email)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Format email tidak valid (contoh: nama@email.com)'),
         ),
       );
-    } else {
+      return;
+    }
+
+    try {
+      final isValid = await DatabaseHelper.instance.login(email, password);
+      if (!mounted) return;
+
+      if (isValid) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => HomePage(userEmail: email),
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Email atau kata sandi salah')),
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Email atau kata sandi salah')),
+        SnackBar(content: Text('Gagal login: $e')),
       );
     }
   }
@@ -131,38 +152,7 @@ class _LoginPageState extends State<LoginPage> {
                           style: TextStyle(fontWeight: FontWeight.w600)),
                     ),
                   ),
-                  const SizedBox(height: 20),
-                  Row(
-                    children: [
-                      Expanded(child: Divider(color: Colors.grey.shade300)),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 10),
-                        child: Text('atau masuk dengan',
-                            style: TextStyle(
-                                color: Colors.grey.shade500, fontSize: 12)),
-                      ),
-                      Expanded(child: Divider(color: Colors.grey.shade300)),
-                    ],
-                  ),
-                  const SizedBox(height: 20),
-                  SizedBox(
-                    height: 50,
-                    child: OutlinedButton.icon(
-                      onPressed: () {},
-                      icon: const _GoogleIcon(),
-                      label: const Text(
-                        'Masuk dengan Google',
-                        style: TextStyle(
-                            color: Colors.black87, fontWeight: FontWeight.w500),
-                      ),
-                      style: OutlinedButton.styleFrom(
-                        side: BorderSide(color: Colors.grey.shade300),
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14)),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 28),
+                  const SizedBox(height: 24),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -218,24 +208,6 @@ class _LoginPageState extends State<LoginPage> {
           borderRadius: BorderRadius.circular(14),
           borderSide: BorderSide.none,
         ),
-      ),
-    );
-  }
-}
-
-class _GoogleIcon extends StatelessWidget {
-  const _GoogleIcon();
-
-  @override
-  Widget build(BuildContext context) {
-    return Image.asset(
-      'assets/GoogleLogo.png',
-      width: 20,
-      height: 20,
-      fit: BoxFit.contain,
-      errorBuilder: (_, _, _) => const Icon(
-        Icons.g_mobiledata_rounded,
-        size: 24,
       ),
     );
   }
