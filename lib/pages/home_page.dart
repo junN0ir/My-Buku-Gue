@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../database/database_helper.dart';
 import '../models/book.dart';
+import '../widgets/book_cover_image.dart';
 import 'book_detail_page.dart';
 import 'favorite_page.dart';
 import 'profile_page.dart';
@@ -55,7 +56,6 @@ class _HomePageState extends State<HomePage> {
           _isLoading = false;
         });
       }
-      _syncCovers();
     } catch (_) {
       if (mounted) {
         setState(() {
@@ -63,18 +63,6 @@ class _HomePageState extends State<HomePage> {
         });
       }
     }
-  }
-
-  Future<void> _syncCovers() async {
-    try {
-      await DatabaseHelper.instance.syncCoversFromApi();
-      final updated = await DatabaseHelper.instance.getBooks();
-      if (mounted) {
-        setState(() {
-          _allBooks = updated;
-        });
-      }
-    } catch (_) {}
   }
 
   void _openDetail(Book book) {
@@ -340,33 +328,10 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildCover(String path, double width, double height) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(8),
-      child: path.startsWith('http')
-          ? Image.network(
-              path,
-              width: width,
-              height: height,
-              fit: BoxFit.cover,
-              errorBuilder: (_, _, _) => Container(
-                width: width,
-                height: height,
-                color: Colors.grey.shade300,
-                child: const Icon(Icons.menu_book, color: Colors.grey),
-              ),
-            )
-          : Image.asset(
-              path,
-              width: width,
-              height: height,
-              fit: BoxFit.cover,
-              errorBuilder: (_, _, _) => Container(
-                width: width,
-                height: height,
-                color: Colors.grey.shade300,
-                child: const Icon(Icons.menu_book, color: Colors.grey),
-              ),
-            ),
+    return BookCoverImage(
+      coverUrl: path,
+      width: width,
+      height: height,
     );
   }
 
@@ -390,7 +355,6 @@ class _HomePageState extends State<HomePage> {
 
     final visibleBooks = booksToDisplay.take(_booksDisplayLimit).toList();
     final hasMore = booksToDisplay.length > _booksDisplayLimit;
-    final remainingCount = booksToDisplay.length - _booksDisplayLimit;
 
     return Column(
       children: [
@@ -408,9 +372,9 @@ class _HomePageState extends State<HomePage> {
                   });
                 },
                 icon: const Icon(Icons.expand_more_rounded, size: 22),
-                label: Text(
-                  'Muat Lebih Banyak ($remainingCount buku lagi)',
-                  style: const TextStyle(
+                label: const Text(
+                  'Muat Lebih Banyak',
+                  style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
                   ),

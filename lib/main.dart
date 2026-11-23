@@ -7,6 +7,8 @@ import 'pages/login_page.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  PaintingBinding.instance.imageCache.maximumSize = 300;
+  PaintingBinding.instance.imageCache.maximumSizeBytes = 100 * 1024 * 1024;
   await Supabase.initialize(
     url: SupabaseConfig.url,
     publishableKey: SupabaseConfig.publishableKey,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../database/database_helper.dart';
 import '../models/book.dart';
+import '../widgets/book_cover_image.dart';
 import 'book_detail_page.dart';
 
 class FavoritePage extends StatefulWidget {
@@ -221,33 +222,10 @@ class _FavoritePageState extends State<FavoritePage> {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: book.cover.startsWith('http')
-                  ? Image.network(
-                      book.cover,
-                      width: 64,
-                      height: 96,
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, _, _) => Container(
-                        width: 64,
-                        height: 96,
-                        color: Colors.grey.shade300,
-                        child: const Icon(Icons.menu_book, color: Colors.grey),
-                      ),
-                    )
-                  : Image.asset(
-                      book.cover,
-                      width: 64,
-                      height: 96,
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, _, _) => Container(
-                        width: 64,
-                        height: 96,
-                        color: Colors.grey.shade300,
-                        child: const Icon(Icons.menu_book, color: Colors.grey),
-                      ),
-                    ),
+            BookCoverImage(
+              coverUrl: book.cover,
+              width: 64,
+              height: 96,
             ),
             const SizedBox(width: 14),
             Expanded(

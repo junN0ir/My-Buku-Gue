@@ -71,8 +71,8 @@ class Book {
       fav = (map['is_favorite'] as int) == 1;
     }
 
-    final rawCover = map['cover'] as String? ?? 'assets/images/atomichabits.jpg';
-    final title = map['judul_buku'] as String? ?? '';
+    final rawCover = (map['cover'] as String?)?.trim() ?? '';
+    final title = (map['judul_buku'] as String?)?.trim() ?? '';
     final accurateCover = resolveCover(title, rawCover);
 
     return Book(

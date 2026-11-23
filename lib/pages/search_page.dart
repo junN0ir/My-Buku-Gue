@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../database/database_helper.dart';
 import '../models/book.dart';
+import '../widgets/book_cover_image.dart';
 import 'book_detail_page.dart';
 
 class SearchPage extends StatefulWidget {
@@ -43,15 +44,20 @@ class _SearchPageState extends State<SearchPage> {
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
 
-    final genres = <String>{'Semua Genre'};
+    final genreSet = <String>{};
     for (final book in widget.books) {
-      genres.add(book.category);
+      genreSet.add(book.category);
     }
+    final sortedGenres = genreSet.toList()..sort();
+    final genres = ['Semua Genre', ...sortedGenres];
 
     final activeGenre =
         genres.contains(_selectedGenre) ? _selectedGenre : 'Semua Genre';
 
     final q = _searchController.text.toLowerCase().trim();
+    final normalizedQ = q.replaceAll(RegExp(r'\s+'), ' ').replaceAll(RegExp(r'[".]'), '');
+    final isEasterEgg = normalizedQ == 'islam ala prabowo';
+
     final filtered = widget.books.where((book) {
       final matchSearch = q.isEmpty ||
           book.title.toLowerCase().contains(q) ||
@@ -61,6 +67,8 @@ class _SearchPageState extends State<SearchPage> {
           activeGenre == 'Semua Genre' || book.category == activeGenre;
       return matchSearch && matchGenre;
     }).toList();
+
+    filtered.sort((a, b) => a.title.toLowerCase().compareTo(b.title.toLowerCase()));
 
     return SafeArea(
       child: Padding(
@@ -85,9 +93,26 @@ class _SearchPageState extends State<SearchPage> {
             Expanded(
               child: filtered.isEmpty
                   ? Center(
-                      child: Text(
-                        'Tidak ada buku yang cocok dengan pencarian.',
-                        style: TextStyle(color: Colors.grey.shade600),
+                      child: SingleChildScrollView(
+                        physics: const BouncingScrollPhysics(),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+                          child: Text(
+                            isEasterEgg
+                                ? '"...Maka janganlah kamu menganggap dirimu suci. Dialah yang paling mengetahui orang yang bertakwa" QS. An-Najm Ayat 32'
+                                : 'Tidak ada buku yang cocok dengan pencarian.',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              color: isEasterEgg
+                                  ? Colors.grey.shade800
+                                  : Colors.grey.shade600,
+                              fontStyle: isEasterEgg
+                                  ? FontStyle.italic
+                                  : FontStyle.normal,
+                              height: 1.5,
+                            ),
+                          ),
+                        ),
                       ),
                     )
                   : ListView.builder(
@@ -152,7 +177,7 @@ class _SearchPageState extends State<SearchPage> {
   }
 
   Widget _buildGenreFilter(
-      Set<String> genres, String activeGenre, Color primary) {
+      List<String> genres, String activeGenre, Color primary) {
     return Row(
       children: [
         const Text('Filter genre',
@@ -210,33 +235,10 @@ class _SearchPageState extends State<SearchPage> {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: book.cover.startsWith('http')
-                  ? Image.network(
-                      book.cover,
-                      width: 64,
-                      height: 96,
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, _, _) => Container(
-                        width: 64,
-                        height: 96,
-                        color: Colors.grey.shade300,
-                        child: const Icon(Icons.menu_book, color: Colors.grey),
-                      ),
-                    )
-                  : Image.asset(
-                      book.cover,
-                      width: 64,
-                      height: 96,
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, _, _) => Container(
-                        width: 64,
-                        height: 96,
-                        color: Colors.grey.shade300,
-                        child: const Icon(Icons.menu_book, color: Colors.grey),
-                      ),
-                    ),
+            BookCoverImage(
+              coverUrl: book.cover,
+              width: 64,
+              height: 96,
             ),
             const SizedBox(width: 14),
             Expanded(
