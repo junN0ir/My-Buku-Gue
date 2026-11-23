@@ -20,6 +20,8 @@ class _HomePageState extends State<HomePage> {
   bool _autoFocusSearch = false;
   String _selectedCategory = 'Semua Buku';
   bool _isLoading = true;
+  int _booksDisplayLimit = 4;
+  String _displayName = 'Pengguna';
 
   List<String> _categories = ['Semua Buku'];
   List<Book> _allBooks = [];
@@ -33,10 +35,21 @@ class _HomePageState extends State<HomePage> {
   Future<void> _loadData() async {
     try {
       await DatabaseHelper.instance.ensureUserLoaded(widget.userEmail);
+      final customName =
+          await DatabaseHelper.instance.getUserName(email: widget.userEmail);
+      final email = widget.userEmail ?? 'junnior@email.com';
+      final defaultName = email.split('@').first;
+      final resolvedName = (customName != null && customName.isNotEmpty)
+          ? customName
+          : (defaultName.isNotEmpty
+              ? defaultName[0].toUpperCase() + defaultName.substring(1)
+              : 'Pengguna');
+
       final books = await DatabaseHelper.instance.getBooks();
       final genres = await DatabaseHelper.instance.getGenres();
       if (mounted) {
         setState(() {
+          _displayName = resolvedName;
           _allBooks = books;
           _categories = ['Semua Buku', ...genres];
           _isLoading = false;
@@ -68,7 +81,7 @@ class _HomePageState extends State<HomePage> {
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => BookDetailPage(book: book)),
-    ).then((_) => _loadData());
+    ).then((_) => setState(() {}));
   }
 
   @override
@@ -79,12 +92,12 @@ class _HomePageState extends State<HomePage> {
       currentBody = SearchPage(
         books: _allBooks,
         autoFocus: _autoFocusSearch,
-        onChanged: _loadData,
+        onChanged: () => setState(() {}),
       );
     } else if (_selectedNavIndex == 2) {
       currentBody = FavoritePage(
         favoriteBooks: _allBooks.where((b) => b.isFavorite).toList(),
-        onChanged: _loadData,
+        onChanged: () => setState(() {}),
         onFindBooks: () => setState(() {
           _autoFocusSearch = false;
           _selectedNavIndex = 0;
@@ -92,14 +105,9 @@ class _HomePageState extends State<HomePage> {
       );
     } else if (_selectedNavIndex == 3) {
       final email = widget.userEmail ?? 'junnior@email.com';
-      final username = email.split('@').first;
-      final capitalized = username.isNotEmpty
-          ? username[0].toUpperCase() + username.substring(1)
-          : 'Pengguna';
-
       currentBody = ProfilePage(
         email: email,
-        username: capitalized,
+        username: _displayName,
         favoriteBooksCount: _allBooks.where((b) => b.isFavorite).length,
       );
     } else {
@@ -140,20 +148,22 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildHeader() {
-    final email = widget.userEmail ?? 'junnior@email.com';
-    final username = email.split('@').first;
-    final displayName = username.isNotEmpty
-        ? username[0].toUpperCase() + username.substring(1)
-        : 'Pengguna';
-    final initial = displayName.isNotEmpty ? displayName[0].toUpperCase() : 'U';
+    final initial = _displayName.trim().isNotEmpty
+        ? _displayName.trim()[0].toUpperCase()
+        : 'U';
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(
-          'Selamat datang, $displayName',
-          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        Expanded(
+          child: Text(
+            'Selamat datang, $_displayName',
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
         ),
+        const SizedBox(width: 10),
         CircleAvatar(
           radius: 20,
           backgroundColor: Colors.blue.shade50,
@@ -307,7 +317,10 @@ class _HomePageState extends State<HomePage> {
           return ChoiceChip(
             label: Text(category),
             selected: isSelected,
-            onSelected: (_) => setState(() => _selectedCategory = category),
+            onSelected: (_) => setState(() {
+              _selectedCategory = category;
+              _booksDisplayLimit = 4;
+            }),
             selectedColor: Theme.of(context).colorScheme.primary,
             backgroundColor: Colors.white,
             labelStyle: TextStyle(
@@ -375,8 +388,49 @@ class _HomePageState extends State<HomePage> {
       );
     }
 
+    final visibleBooks = booksToDisplay.take(_booksDisplayLimit).toList();
+    final hasMore = booksToDisplay.length > _booksDisplayLimit;
+    final remainingCount = booksToDisplay.length - _booksDisplayLimit;
+
     return Column(
-      children: booksToDisplay.map((book) => _buildBookCard(book)).toList(),
+      children: [
+        ...visibleBooks.map((book) => _buildBookCard(book)),
+        if (hasMore)
+          Padding(
+            padding: const EdgeInsets.only(top: 8, bottom: 20),
+            child: SizedBox(
+              width: double.infinity,
+              height: 48,
+              child: OutlinedButton.icon(
+                onPressed: () {
+                  setState(() {
+                    _booksDisplayLimit += 4;
+                  });
+                },
+                icon: const Icon(Icons.expand_more_rounded, size: 22),
+                label: Text(
+                  'Muat Lebih Banyak ($remainingCount buku lagi)',
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: Theme.of(context).colorScheme.primary,
+                  side: BorderSide(
+                    color: Theme.of(context)
+                        .colorScheme
+                        .primary
+                        .withValues(alpha: 0.35),
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                ),
+              ),
+            ),
+          ),
+      ],
     );
   }
 
@@ -447,8 +501,27 @@ class _HomePageState extends State<HomePage> {
                 color: book.isFavorite ? Colors.amber : Colors.grey.shade400,
               ),
               onPressed: () async {
-                await DatabaseHelper.instance.toggleFavorite(book);
-                _loadData();
+                final isFav = book.isFavorite;
+                setState(() {
+                  book.isFavorite = !isFav;
+                });
+                try {
+                  if (!isFav) {
+                    await DatabaseHelper.instance.addFavorite(book.id!);
+                  } else {
+                    await DatabaseHelper.instance.removeFavorite(book.id!);
+                  }
+                } catch (e) {
+                  if (mounted && context.mounted) {
+                    setState(() {
+                      book.isFavorite = isFav;
+                    });
+                    final pesan = DatabaseHelper.getFriendlyErrorMessage(e);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text(pesan), backgroundColor: const Color(0xFF424242)),
+                    );
+                  }
+                }
               },
             ),
           ],

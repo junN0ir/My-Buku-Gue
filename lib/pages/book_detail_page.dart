@@ -104,8 +104,26 @@ class _BookDetailPageState extends State<BookDetailPage> {
                   const Spacer(),
                   OutlinedButton.icon(
                     onPressed: () async {
-                      await DatabaseHelper.instance.toggleFavorite(book);
-                      setState(() {});
+                      final isFav = book.isFavorite;
+                      setState(() {
+                        book.isFavorite = !isFav;
+                      });
+                      try {
+                        if (!isFav) {
+                          await DatabaseHelper.instance.addFavorite(book.id!);
+                        } else {
+                          await DatabaseHelper.instance.removeFavorite(book.id!);
+                        }
+                      } catch (e) {
+                        if (!context.mounted) return;
+                        setState(() {
+                          book.isFavorite = isFav;
+                        });
+                        final pesan = DatabaseHelper.getFriendlyErrorMessage(e);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text(pesan), backgroundColor: const Color(0xFF424242)),
+                        );
+                      }
                     },
                     icon: Icon(
                       book.isFavorite ? Icons.star : Icons.star_border,

@@ -27,6 +27,36 @@ class Book {
     this.isFavorite = false,
   });
 
+  static bool hasLocalCover(String title) {
+    final lower = title.toLowerCase().trim();
+    return lower.contains('creative act') ||
+        lower.contains('the creative') ||
+        lower.contains('sapiens') ||
+        lower.contains('atomic habits') ||
+        lower.contains('dune') ||
+        (lower.contains('tomorrow') && lower.contains('tomorrow'));
+  }
+
+  static String resolveCover(String title, String rawCover) {
+    final lower = title.toLowerCase().trim();
+    if (lower.contains('creative act') || lower.contains('the creative')) {
+      return 'assets/images/thecreativeart.jpg';
+    }
+    if (lower.contains('sapiens')) {
+      return 'assets/images/sapiens.jpg';
+    }
+    if (lower.contains('atomic habits')) {
+      return 'assets/images/atomichabits.jpg';
+    }
+    if (lower.contains('dune')) {
+      return 'assets/images/dune.png';
+    }
+    if (lower.contains('tomorrow') && lower.contains('tomorrow')) {
+      return 'assets/images/tomorrow.jpg';
+    }
+    return rawCover;
+  }
+
   factory Book.fromMap(Map<String, dynamic> map) {
     final genreData = map['genre'] as Map<String, dynamic>?;
     final penulisData = map['penulis'] as Map<String, dynamic>?;
@@ -41,16 +71,20 @@ class Book {
       fav = (map['is_favorite'] as int) == 1;
     }
 
+    final rawCover = map['cover'] as String? ?? 'assets/images/atomichabits.jpg';
+    final title = map['judul_buku'] as String? ?? '';
+    final accurateCover = resolveCover(title, rawCover);
+
     return Book(
       id: map['id_buku'] as int?,
-      title: map['judul_buku'] as String? ?? '',
+      title: title,
       author: (penulisData?['nama_penulis'] ?? map['nama_penulis']) as String? ??
           'Penulis Umum',
       category: (genreData?['nama_genre'] ?? map['nama_genre']) as String? ??
           'General',
       rating: (map['rating'] as num?)?.toDouble() ?? 4.5,
       pages: map['pages'] as int? ?? 200,
-      cover: map['cover'] as String? ?? 'assets/images/atomichabits.jpg',
+      cover: accurateCover,
       publisher: map['penerbit'] as String? ?? '',
       year: map['tahun_terbit'] as int? ?? 2023,
       synopsis: map['sinopsis'] as String? ?? '',

@@ -292,8 +292,29 @@ class _FavoritePageState extends State<FavoritePage> {
                 color: book.isFavorite ? Colors.amber : Colors.grey.shade400,
               ),
               onPressed: () async {
-                await DatabaseHelper.instance.toggleFavorite(book);
+                final isFav = book.isFavorite;
+                setState(() {
+                  book.isFavorite = !isFav;
+                });
                 widget.onChanged();
+                try {
+                  if (!isFav) {
+                    await DatabaseHelper.instance.addFavorite(book.id!);
+                  } else {
+                    await DatabaseHelper.instance.removeFavorite(book.id!);
+                  }
+                } catch (e) {
+                  if (mounted && context.mounted) {
+                    setState(() {
+                      book.isFavorite = isFav;
+                    });
+                    widget.onChanged();
+                    final pesan = DatabaseHelper.getFriendlyErrorMessage(e);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text(pesan), backgroundColor: const Color(0xFF424242)),
+                    );
+                  }
+                }
               },
             ),
           ],

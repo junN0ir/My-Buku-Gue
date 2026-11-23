@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import '../database/database_helper.dart';
 import 'login_page.dart';
 
@@ -30,8 +31,12 @@ class ProfilePage extends StatelessWidget {
             child: const Text('Batal', style: TextStyle(color: Colors.grey)),
           ),
           FilledButton(
-            onPressed: () {
-              DatabaseHelper.instance.logout();
+            onPressed: () async {
+              await DatabaseHelper.instance.logout();
+              try {
+                await GoogleSignIn().signOut();
+              } catch (_) {}
+              if (!context.mounted) return;
               Navigator.pop(ctx);
               Navigator.pushAndRemoveUntil(
                 context,
@@ -69,6 +74,8 @@ class ProfilePage extends StatelessWidget {
             _buildAccountDetailsCard(primary),
             const SizedBox(height: 32),
             _buildLogoutButton(context),
+            const SizedBox(height: 12),
+            _buildDeleteAccountButton(context),
           ],
         ),
       ),
@@ -196,6 +203,101 @@ class ProfilePage extends StatelessWidget {
           side: BorderSide(color: Colors.red.shade200),
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+        ),
+      ),
+    );
+  }
+
+  void _confirmDeleteAccount(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Row(
+          children: [
+            Icon(Icons.warning_amber_rounded, color: Colors.red, size: 26),
+            SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                'Hapus Akun Permanen?',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16.5),
+              ),
+            ),
+          ],
+        ),
+        content: const Text(
+          'Semua data profil dan buku favorit kamu akan dihapus secara permanen dari server dan tidak dapat dikembalikan.\n\nApakah kamu yakin ingin melanjutkan?',
+          style: TextStyle(height: 1.45, fontSize: 13.5),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Batal', style: TextStyle(color: Colors.grey)),
+          ),
+          FilledButton(
+            onPressed: () async {
+              Navigator.pop(ctx);
+              final success =
+                  await DatabaseHelper.instance.deleteCurrentAccount();
+              try {
+                await GoogleSignIn().signOut();
+              } catch (_) {}
+              if (!context.mounted) return;
+
+              if (success) {
+                Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(builder: (context) => const LoginPage()),
+                  (route) => false,
+                );
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Akun kamu berhasil dihapus secara permanen.'),
+                    backgroundColor: Color(0xFF424242),
+                  ),
+                );
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Gagal menghapus akun. Silakan coba lagi.'),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+              }
+            },
+            style: FilledButton.styleFrom(
+              backgroundColor: Colors.red,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+            child: const Text('Hapus Akun'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDeleteAccountButton(BuildContext context) {
+    return SizedBox(
+      width: double.infinity,
+      height: 48,
+      child: TextButton.icon(
+        onPressed: () => _confirmDeleteAccount(context),
+        icon: Icon(Icons.delete_forever_rounded,
+            color: Colors.red.shade400, size: 20),
+        label: Text(
+          'Hapus Akun Permanen',
+          style: TextStyle(
+            color: Colors.red.shade400,
+            fontWeight: FontWeight.w600,
+            fontSize: 13.5,
+          ),
+        ),
+        style: TextButton.styleFrom(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(14),
+          ),
         ),
       ),
     );
