@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kebijakan Privasi — MyBuku</title>
+<style>
+  :root { color-scheme: light; }
+  body {
+    margin: 0 auto;
+    padding: 40px 20px 64px;
+    max-width: 720px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    line-height: 1.65;
+    color: #1f2937;
+    background: #f7f7f2;
+  }
+  h1 { font-size: 1.9rem; line-height: 1.25; margin: 0 0 4px; color: #1e3a8a; }
+  h2 { font-size: 1.15rem; margin: 32px 0 8px; color: #1e3a8a; }
+  .meta { color: #6b7280; font-size: .9rem; margin-bottom: 32px; }
+  ul { padding-left: 22px; }
+  li { margin: 6px 0; }
+  a { color: #1e3a8a; }
+  .card {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 20px 22px;
+    margin: 24px 0;
+  }
+  footer { margin-top: 40px; font-size: .85rem; color: #6b7280; }
+</style>
+</head>
+<body>
+  <h1>Kebijakan Privasi MyBuku</h1>
+  <p class="meta">Terakhir diperbarui: 25 November 2026</p>
+
+  <div class="card">
+    <strong>Ringkasan:</strong> MyBuku menghormati privasi Anda. Data akun (email dan nama) hanya digunakan untuk autentikasi dan sinkronisasi daftar buku favorit. Pengguna memiliki kendali penuh dan dapat menghapus akun beserta seluruh data secara permanen kapan saja.
+  </div>
+
+  <h2>1. Data yang Kami Kumpulkan</h2>
+  <p>
+    Aplikasi MyBuku mengumpulkan informasi seminimal mungkin yang diperlukan untuk menjalankan fitur aplikasi:
+  </p>
+  <ul>
+    <li><strong>Data Akun:</strong> Alamat email dan nama tampilan yang Anda daftarkan atau gunakan saat masuk (Email & Password atau Google Sign-In) untuk mengidentifikasi akun Anda. Kata sandi dienkripsi secara aman oleh sistem autentikasi dan tidak pernah dapat dibaca dalam bentuk teks biasa.</li>
+    <li><strong>Data Favorit:</strong> Daftar ID buku yang Anda tandai sebagai favorit agar tersimpan dan dapat diakses kembali di halaman Koleksi.</li>
+  </ul>
+
+  <h2>2. Izin Aplikasi (Permissions)</h2>
+  <p>
+    MyBuku hanya memerlukan dan menggunakan satu izin sistem:
+  </p>
+  <ul>
+    <li><code>android.permission.INTERNET</code>: Digunakan untuk menghubungi server database (Supabase) dan mengambil gambar sampul buku dari API publik Open Library.</li>
+  </ul>
+  <p>Aplikasi <strong>TIDAK</strong> meminta izin akses ke:</p>
+  <ul>
+    <li>Kamera atau mikrofon,</li>
+    <li>Lokasi perangkat (GPS),</li>
+    <li>Kontak telepon,</li>
+    <li>Penyimpanan eksternal atau file pribadi perangkat.</li>
+  </ul>
+
+  <h2>3. Keamanan & Penyimpanan Data</h2>
+  <p>
+    Semua komunikasi data antara aplikasi MyBuku dan server backend dilindungi menggunakan protokol enkripsi standar industri <strong>HTTPS / TLS</strong>. Data disimpan pada infrastruktur cloud Supabase yang aman dengan kebijakan akses berbasis baris (Row Level Security).
+  </p>
+
+  <h2>4. Hak Pengguna & Penghapusan Akun (Account Deletion)</h2>
+  <p>
+    Sesuai dengan ketentuan Google Play Store:
+  </p>
+  <ul>
+    <li><strong>Penghapusan Mandiri di Aplikasi:</strong> Anda dapat menghapus akun beserta seluruh data riwayat favorit secara instan dan permanen kapan saja melalui menu: <em>Profil &rarr; Hapus Akun Permanen</em>.</li>
+    <li><strong>Permintaan Eksternal:</strong> Anda juga dapat meminta penghapusan akun dengan mengirimkan email permohonan ke kontak pengembang kami.</li>
+  </ul>
+
+  <h2>5. Pihak Ketiga</h2>
+  <p>
+    Kami <strong>tidak pernah menjual, menyewakan, atau membagikan</strong> data pribadi Anda kepada pihak ketiga atau pengiklan mana pun. Layanan pihak ketiga yang terintegrasi meliputi:
+  </p>
+  <ul>
+    <li><strong>Supabase:</strong> Sebagai penyedia infrastruktur autentikasi dan database yang aman.</li>
+    <li><strong>Open Library (Internet Archive):</strong> Digunakan untuk memuat gambar sampul buku publik. Tidak ada data pribadi Anda yang dikirim ke Open Library.</li>
+  </ul>
+
+  <h2>6. Batasan Usia</h2>
+  <p>
+    Aplikasi ini ditujukan untuk pengguna berusia 13 tahun ke atas. Katalog buku yang tersedia merupakan literatur fiksi, fantasi, sains, biografi, dan pengetahuan umum tanpa konten dewasa atau materi sensitif.
+  </p>
+
+  <h2>7. Perubahan Kebijakan</h2>
+  <p>
+    Kebijakan privasi ini dapat diperbarui sewaktu-waktu jika terdapat perubahan fitur aplikasi. Pembaruan akan selalu ditampilkan di halaman web ini.
+  </p>
+
+  <h2>8. Kontak</h2>
+  <p>
+    Jika Anda memiliki pertanyaan mengenai kebijakan privasi ini atau pengelolaan akun Anda, silakan hubungi pengembang melalui email atau repositori GitHub proyek.
+  </p>
+
+  <footer>MyBuku — Aplikasi Katalog & Koleksi Buku.</footer>
+</body>
+</html>
