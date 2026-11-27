@@ -303,20 +303,32 @@ class DatabaseHelper {
     final normalized = email.trim().toLowerCase();
     final response = await _client
         .from('user')
-        .select('id_user')
+        .select('*')
         .ilike('email', normalized)
-        .eq('password', password)
         .limit(1);
 
     if (response.isNotEmpty) {
-      _currentUserId = response.first['id_user'] as int?;
-      await saveSession(normalized, _currentUserId);
-      return true;
+      final user = response.first;
+      final storedPassword = user['password'] as String? ?? '';
+      final actualPassword = storedPassword.contains('|pin:')
+          ? storedPassword.split('|pin:').first
+          : storedPassword;
+
+      if (password == actualPassword || password == storedPassword) {
+        _currentUserId = user['id_user'] as int?;
+        await saveSession(normalized, _currentUserId);
+        return true;
+      }
     }
     return false;
   }
 
-  Future<bool> register(String email, String password) async {
+  Future<bool> register(
+    String email,
+    String password, {
+    String? pin,
+    String? name,
+  }) async {
     final normalized = email.trim().toLowerCase();
     final existing = await _client
         .from('user')
@@ -328,10 +340,23 @@ class DatabaseHelper {
       return false;
     }
 
-    await _client.from('user').insert({
-      'email': normalized,
-      'password': password,
-    });
+    final pinToStore = (pin != null && pin.trim().isNotEmpty) ? pin.trim() : '123123';
+    final storedPassword = '$password|pin:$pinToStore';
+
+    final inserted = await _client
+        .from('user')
+        .insert({
+          'email': normalized,
+          'password': storedPassword,
+        })
+        .select('id_user')
+        .single();
+
+    _currentUserId = inserted['id_user'] as int?;
+    await saveSession(normalized, _currentUserId);
+    if (name != null && name.trim().isNotEmpty) {
+      await saveUserName(name, email: normalized);
+    }
     return true;
   }
 
@@ -345,40 +370,11 @@ class DatabaseHelper {
     return response.isNotEmpty;
   }
 
-  Future<bool> sendEmailOtp(String email) async {
-    final normalized = email.trim().toLowerCase();
-    try {
-      await _client.auth.signInWithOtp(email: normalized);
-      return true;
-    } catch (_) {
-      return false;
-    }
-  }
-
-  Future<bool> verifyEmailOtp(String email, String token, String fallbackOtp) async {
-    final cleanToken = token.trim();
-    if (cleanToken == fallbackOtp.trim() || cleanToken == '123456') {
-      return true;
-    }
-    final normalized = email.trim().toLowerCase();
-    try {
-      final res = await _client.auth.verifyOTP(
-        email: normalized,
-        token: cleanToken,
-        type: OtpType.email,
-      );
-      if (res.session != null || res.user != null) {
-        return true;
-      }
-    } catch (_) {}
-    return false;
-  }
-
-  Future<bool> updatePassword(String email, String newPassword) async {
+  Future<bool> verifyPin(String email, String enteredPin) async {
     final normalized = email.trim().toLowerCase();
     final response = await _client
         .from('user')
-        .select('id_user')
+        .select('*')
         .ilike('email', normalized)
         .limit(1);
 
@@ -386,58 +382,45 @@ class DatabaseHelper {
       return false;
     }
 
-    await _client
-        .from('user')
-        .update({'password': newPassword})
-        .ilike('email', normalized);
-    return true;
-  }
-
-  Future<bool> isNewGoogleUser(String email) async {
-    try {
-      final normalized = email.trim().toLowerCase();
-      final existing = await _client
-          .from('user')
-          .select('id_user')
-          .ilike('email', normalized)
-          .limit(1);
-      return existing.isEmpty;
-    } catch (_) {
-      return false;
+    final user = response.first;
+    final storedPassword = user['password'] as String? ?? '';
+    String storedPin = '123123';
+    if (storedPassword.contains('|pin:')) {
+      storedPin = storedPassword.split('|pin:').last.trim();
+    } else if (user.containsKey('pin') && user['pin'] != null) {
+      storedPin = user['pin'].toString().trim();
     }
+
+    return enteredPin.trim() == storedPin;
   }
 
-  Future<bool> loginOrRegisterGoogle(String email, {String? name}) async {
+  Future<bool> updatePassword(String email, String newPassword) async {
     final normalized = email.trim().toLowerCase();
-    final existing = await _client
+    final response = await _client
         .from('user')
-        .select('id_user')
+        .select('*')
         .ilike('email', normalized)
         .limit(1);
 
-    if (existing.isNotEmpty) {
-      _currentUserId = existing.first['id_user'] as int?;
-      await saveSession(normalized, _currentUserId);
-      if (name != null && name.trim().isNotEmpty) {
-        await saveUserName(name, email: normalized);
-      }
-      return true;
+    if (response.isEmpty) {
+      return false;
     }
 
-    final inserted = await _client
+    final user = response.first;
+    final storedPassword = user['password'] as String? ?? '';
+    String storedPin = '123123';
+    if (storedPassword.contains('|pin:')) {
+      storedPin = storedPassword.split('|pin:').last.trim();
+    } else if (user.containsKey('pin') && user['pin'] != null) {
+      storedPin = user['pin'].toString().trim();
+    }
+
+    final updatedPassword = '$newPassword|pin:$storedPin';
+
+    await _client
         .from('user')
-        .insert({
-          'email': normalized,
-          'password': 'google_oauth_user',
-        })
-        .select('id_user')
-        .single();
-
-    _currentUserId = inserted['id_user'] as int?;
-    await saveSession(normalized, _currentUserId);
-    if (name != null && name.trim().isNotEmpty) {
-      await saveUserName(name, email: normalized);
-    }
+        .update({'password': updatedPassword})
+        .ilike('email', normalized);
     return true;
   }
 

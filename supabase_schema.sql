@@ -74,6 +74,6 @@ INSERT INTO public.favorit (id_buku, tanggal_ditambahkan) VALUES
   (1, NOW()::TEXT),
   (2, NOW()::TEXT);
 
-INSERT INTO public."user" (email, password, id_favorit) VALUES
-  ('junnior@email.com', '123', 1)
+INSERT INTO public."user" (email, password) VALUES
+  ('testing123@email.com', 'testing123|pin:123123')
 ON CONFLICT (email) DO NOTHING;

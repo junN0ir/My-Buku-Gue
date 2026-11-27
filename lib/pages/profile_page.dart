@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_sign_in/google_sign_in.dart';
 import '../database/database_helper.dart';
 import 'login_page.dart';
 
@@ -33,9 +32,6 @@ class ProfilePage extends StatelessWidget {
           FilledButton(
             onPressed: () async {
               await DatabaseHelper.instance.logout();
-              try {
-                await GoogleSignIn().signOut();
-              } catch (_) {}
               if (!context.mounted) return;
               Navigator.pop(ctx);
               Navigator.pushAndRemoveUntil(
@@ -239,9 +235,6 @@ class ProfilePage extends StatelessWidget {
               Navigator.pop(ctx);
               final success =
                   await DatabaseHelper.instance.deleteCurrentAccount();
-              try {
-                await GoogleSignIn().signOut();
-              } catch (_) {}
               if (!context.mounted) return;
 
               if (success) {

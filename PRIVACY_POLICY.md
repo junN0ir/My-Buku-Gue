@@ -1,6 +1,6 @@
 # Kebijakan Privasi (Privacy Policy) - MyBuku
 
-*Terakhir diperbarui: 24 November 2026*
+*Terakhir diperbarui: 28 November 2026*
 
 Selamat datang di **MyBuku** ("Aplikasi"). Kami menghormati privasi Anda dan berkomitmen untuk melindungi data pribadi yang Anda bagikan saat menggunakan aplikasi ini. Kebijakan Privasi ini menjelaskan bagaimana kami mengumpulkan, menggunakan, dan melindungi informasi Anda sesuai dengan kebijakan Google Play Store dan undang-undang perlindungan data yang berlaku.
 
@@ -11,13 +11,14 @@ Selamat datang di **MyBuku** ("Aplikasi"). Kami menghormati privasi Anda dan ber
 Aplikasi MyBuku hanya mengumpulkan data yang diperlukan untuk menjalankan fitur-fitur utama aplikasi:
 
 1. **Informasi Akun Pengguna:**
-   - **Email & Nama:** Saat Anda mendaftar atau masuk melalui Google Sign-In / Email, kami menyimpan alamat email dan nama tampilan untuk mengidentifikasi akun Anda dan mengelola preferensi buku.
-   - **Kata Sandi:** Jika mendaftar menggunakan email dan password, kata sandi Anda dienkripsi secara aman oleh penyedia layanan autentikasi (Supabase Auth) dan tidak pernah dapat dibaca dalam bentuk teks biasa.
+   - **Email & Nama:** Saat Anda mendaftar akun, kami menyimpan alamat email dan nama pengguna untuk mengidentifikasi akun Anda dan mengelola koleksi buku favorit Anda.
+   - **Kata Sandi:** Kata sandi akun Anda disimpan secara aman dan terenkripsi, serta tidak pernah dapat dibaca dalam bentuk teks terbuka oleh pihak manapun.
+   - **PIN Keamanan Akun (6 Digit):** Saat mendaftar, Anda menentukan 6 digit PIN keamanan. PIN ini digunakan secara eksklusif untuk verifikasi identitas mandiri ketika Anda mengatur ulang kata sandi (lupa kata sandi).
 
 2. **Data Aktivitas & Preferensi:**
-   - **Buku Favorit:** Daftar buku yang Anda tandai sebagai favorit disimpan agar Anda dapat mengaksesnya kembali di halaman Koleksi.
+   - **Buku Favorit:** Daftar buku yang Anda tandai sebagai favorit disimpan di server database agar Anda dapat mengaksesnya kembali di halaman Koleksi di perangkat manapun saat masuk.
 
-3. **Data Teknis & Pengambilan Cover:**
+3. **Data Teknis & Pengambilan Sampul:**
    - Aplikasi mengambil informasi metadata dan sampul buku dari API publik (Open Library / Internet Archive). Tidak ada data pribadi Anda yang dikirimkan ke layanan pihak ketiga tersebut saat memuat sampul buku.
 
 ---
@@ -25,11 +26,12 @@ Aplikasi MyBuku hanya mengumpulkan data yang diperlukan untuk menjalankan fitur-
 ## 2. Penggunaan Informasi
 
 Informasi yang dikumpulkan hanya digunakan untuk:
-- Mengautentikasi dan mengelola sesi masuk pengguna.
+- Mengautentikasi dan mengelola sesi masuk pengguna (Email & Kata Sandi).
+- Memverifikasi identitas pengguna saat pemulihan kata sandi melalui PIN keamanan 6 digit.
 - Menyimpan dan menyinkronkan daftar buku favorit pengguna.
 - Menampilkan nama pengguna dan status koleksi di halaman Profil.
 
-Kami **TIDAK** menjual, menyewakan, atau membagikan data pribadi Anda kepada pihak ketiga atau pengiklan mana pun.
+Kami **TIDAK** menjual, menyewakan, atau membagikan data pribadi Anda kepada pihak ketiga atau jaringan pengiklan mana pun.
 
 ---
 
@@ -37,13 +39,14 @@ Kami **TIDAK** menjual, menyewakan, atau membagikan data pribadi Anda kepada pih
 
 - Semua komunikasi data antara Aplikasi dan server backend (Supabase) dilindungi menggunakan enkripsi standar industri **HTTPS / TLS**.
 - Kunci API dan akses database diamankan dengan kebijakan *Row Level Security* (RLS).
+- Kredensial akun dan PIN disimpan secara aman dan terlindungi.
 
 ---
 
 ## 4. Hak Pengguna & Penghapusan Data (Account Deletion)
 
 Sesuai dengan kebijakan Google Play Store mengenai penghapusan akun:
-- **Penghapusan Mandiri di Dalam Aplikasi:** Pengguna dapat menghapus akun dan seluruh data favorit secara permanen kapan saja melalui menu:
+- **Penghapusan Mandiri di Dalam Aplikasi:** Pengguna dapat menghapus akun dan seluruh data riwayat favorit secara permanen kapan saja melalui menu:
   `Profil` -> `Hapus Akun Permanen`.
 - **Permintaan Penghapusan Eksternal:** Pengguna juga dapat meminta penghapusan akun dan data melalui email pengembang dengan menyertakan alamat email yang terdaftar.
 
@@ -51,12 +54,12 @@ Sesuai dengan kebijakan Google Play Store mengenai penghapusan akun:
 
 ## 5. Batasan Usia
 
-Aplikasi ini ditujukan untuk pengguna berusia 13 tahun ke atas. Katalog buku yang tersedia merupakan literatur fiksi, fantasi, sains, dan umum tanpa konten eksplisit atau materi dewasa.
+Aplikasi ini ditujukan untuk pengguna berusia 13 tahun ke atas. Katalog buku yang tersedia merupakan literatur fiksi, fantasi, sains, biografi, dan literatur umum tanpa konten eksplisit atau materi dewasa.
 
 ---
 
 ## 6. Kontak Pengembang
 
 Jika Anda memiliki pertanyaan mengenai Kebijakan Privasi ini atau pengelolaan data Anda, silakan hubungi kami melalui:
-- **Email:** support@mybuku.app (atau email pengembang Anda)
+- **Email:** junniormarcellino20@gmail.com
 - **Aplikasi:** MyBuku

@@ -1,7 +1,7 @@
-import 'dart:async';
-import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../database/database_helper.dart';
+import 'login_page.dart';
 
 class ForgotPasswordPage extends StatefulWidget {
   const ForgotPasswordPage({super.key});
@@ -12,11 +12,14 @@ class ForgotPasswordPage extends StatefulWidget {
 
 class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
   final _emailController = TextEditingController();
+  final _pinController = TextEditingController();
+  bool _obscurePin = true;
   bool _isLoading = false;
 
   @override
   void dispose() {
     _emailController.dispose();
+    _pinController.dispose();
     super.dispose();
   }
 
@@ -25,19 +28,14 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
     return regex.hasMatch(email);
   }
 
-  String _generateOtp() {
-    final random = Random();
-    final code = 100000 + random.nextInt(900000);
-    return code.toString();
-  }
-
-  Future<void> _kirimKode() async {
+  Future<void> _verifikasiPin() async {
     final email = _emailController.text.trim();
+    final pin = _pinController.text.trim();
 
-    if (email.isEmpty) {
+    if (email.isEmpty || pin.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Silakan masukkan email kamu'),
+          content: Text('Email dan PIN keamanan wajib diisi'),
           backgroundColor: Color(0xFF424242),
         ),
       );
@@ -48,6 +46,16 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Format email tidak valid (contoh: nama@email.com)'),
+          backgroundColor: Color(0xFF424242),
+        ),
+      );
+      return;
+    }
+
+    if (pin.length != 6 || !RegExp(r'^\d{6}$').hasMatch(pin)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('PIN keamanan harus 6 digit angka'),
           backgroundColor: Color(0xFF424242),
         ),
       );
@@ -71,21 +79,25 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
         return;
       }
 
-      final otpCode = _generateOtp();
-      final sent = await DatabaseHelper.instance.sendEmailOtp(email);
+      final isPinValid = await DatabaseHelper.instance.verifyPin(email, pin);
       if (!mounted) return;
       setState(() => _isLoading = false);
 
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => VerifyOtpPage(
-            email: email,
-            expectedOtp: otpCode,
-            initialEmailSent: sent,
+      if (isPinValid) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => NewPasswordPage(email: email),
           ),
-        ),
-      );
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('PIN keamanan salah. Silakan periksa kembali 6 digit PIN kamu.'),
+            backgroundColor: Color(0xFF424242),
+          ),
+        );
+      }
     } catch (e) {
       if (!mounted) return;
       setState(() => _isLoading = false);
@@ -104,11 +116,12 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
     final primary = Theme.of(context).colorScheme.primary;
 
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          icon: const Icon(Icons.arrow_back, color: Colors.black87),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -126,23 +139,23 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                     children: [
                       Image.asset(
                         'assets/logomybookgweh-nobg.png',
-                        height: 75,
+                        height: 80,
                         fit: BoxFit.contain,
                         errorBuilder: (_, _, _) => Icon(
                           Icons.menu_book_rounded,
                           color: primary,
-                          size: 38,
+                          size: 40,
                         ),
                       ),
-                      const SizedBox(height: 10),
+                      const SizedBox(height: 12),
                       Image.asset(
                         'assets/LogoTulisan-nobg.png',
                         height: 48,
                         fit: BoxFit.contain,
                         errorBuilder: (_, _, _) => Text(
-                          'My Buku Gue',
+                          'MyBuku',
                           style: TextStyle(
-                            fontSize: 20,
+                            fontSize: 22,
                             fontWeight: FontWeight.bold,
                             color: primary,
                           ),
@@ -151,7 +164,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                     ],
                   ),
                 ),
-                const SizedBox(height: 30),
+                const SizedBox(height: 28),
                 Text(
                   'Lupa Kata Sandi',
                   style: TextStyle(
@@ -162,14 +175,16 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Masukkan alamat email akun MyBuku kamu. Kami akan mengirimkan 6 digit kode verifikasi untuk mengatur ulang kata sandi.',
+                  'Masukkan email dan 6 digit PIN akun kamu untuk mengatur ulang kata sandi',
                   style: TextStyle(
                     fontSize: 13.5,
                     color: Colors.grey.shade600,
                     height: 1.45,
                   ),
                 ),
-                const SizedBox(height: 28),
+                const SizedBox(height: 24),
+
+                // Email
                 TextField(
                   controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
@@ -186,11 +201,43 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                     ),
                   ),
                 ),
+                const SizedBox(height: 14),
+
+                // PIN Keamanan 6 Digit
+                TextField(
+                  controller: _pinController,
+                  keyboardType: TextInputType.number,
+                  maxLength: 6,
+                  obscureText: _obscurePin,
+                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                  buildCounter: (context, {required currentLength, required isFocused, maxLength}) => null,
+                  decoration: InputDecoration(
+                    prefixIcon: const Icon(Icons.dialpad_rounded, color: Colors.grey),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        _obscurePin ? Icons.visibility_off : Icons.visibility,
+                        color: Colors.grey,
+                      ),
+                      onPressed: () => setState(() => _obscurePin = !_obscurePin),
+                    ),
+                    hintText: 'Masukkan 6 digit PIN keamanan',
+                    hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14),
+                    filled: true,
+                    fillColor: const Color(0xFFF2F3F5),
+                    contentPadding: const EdgeInsets.symmetric(vertical: 14),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14),
+                      borderSide: BorderSide.none,
+                    ),
+                  ),
+                ),
                 const SizedBox(height: 24),
+
+                // Tombol Verifikasi
                 SizedBox(
                   height: 50,
                   child: FilledButton(
-                    onPressed: _isLoading ? null : _kirimKode,
+                    onPressed: _isLoading ? null : _verifikasiPin,
                     style: FilledButton.styleFrom(
                       backgroundColor: primary,
                       shape: RoundedRectangleBorder(
@@ -207,7 +254,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                             ),
                           )
                         : const Text(
-                            'Kirim Kode Verifikasi',
+                            'Lanjut ke Kata Sandi Baru',
                             style: TextStyle(
                               fontSize: 15,
                               fontWeight: FontWeight.w600,
@@ -216,6 +263,8 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                   ),
                 ),
                 const SizedBox(height: 24),
+
+                // Ingat kata sandi kamu? Masuk
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -245,506 +294,44 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
   }
 }
 
-class VerifyOtpPage extends StatefulWidget {
-  final String email;
-  final String expectedOtp;
-  final bool initialEmailSent;
-
-  const VerifyOtpPage({
-    super.key,
-    required this.email,
-    required this.expectedOtp,
-    this.initialEmailSent = true,
-  });
-
-  @override
-  State<VerifyOtpPage> createState() => _VerifyOtpPageState();
-}
-
-class _VerifyOtpPageState extends State<VerifyOtpPage> {
-  final _otpController = TextEditingController();
-  late String _currentOtp;
-  bool _isVerifying = false;
-  bool _isResending = false;
-  int _countdownSeconds = 60;
-  Timer? _timer;
-
-  @override
-  void initState() {
-    super.initState();
-    _currentOtp = widget.expectedOtp;
-    _startCountdown();
-  }
-
-  void _startCountdown() {
-    _timer?.cancel();
-    setState(() {
-      _countdownSeconds = 60;
-    });
-    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (_countdownSeconds > 0) {
-        setState(() {
-          _countdownSeconds--;
-        });
-      } else {
-        _timer?.cancel();
-      }
-    });
-  }
-
-  @override
-  void dispose() {
-    _timer?.cancel();
-    _otpController.dispose();
-    super.dispose();
-  }
-
-  void _showBantuanDialog() {
-    showModalBottomSheet<void>(
-      context: context,
-      backgroundColor: Colors.white,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (bCtx) => SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF3D5CFF).withValues(alpha: 0.1),
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(
-                      Icons.mark_email_unread_outlined,
-                      color: Color(0xFF3D5CFF),
-                      size: 24,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  const Expanded(
-                    child: Text(
-                      'Bantuan Kode Verifikasi',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.close, size: 20, color: Colors.grey),
-                    onPressed: () => Navigator.pop(bCtx),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 14),
-              const Text(
-                '1. Pastikan periksa folder Inbox dan Spam di email kamu.\n2. Jika server email gratis sedang antre atau limit kuota pengiriman, kamu dapat langsung menggunakan kode berikut untuk verifikasi:',
-                style: TextStyle(fontSize: 13, height: 1.5, color: Colors.black87),
-              ),
-              const SizedBox(height: 14),
-              Container(
-                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFF2F3F5),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: const Color(0xFF3D5CFF), width: 1),
-                ),
-                child: Center(
-                  child: Text(
-                    _currentOtp,
-                    style: const TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 6,
-                      color: Color(0xFF3D5CFF),
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-              FilledButton(
-                onPressed: () {
-                  setState(() {
-                    _otpController.text = _currentOtp;
-                  });
-                  Navigator.pop(bCtx);
-                },
-                style: FilledButton.styleFrom(
-                  backgroundColor: const Color(0xFF3D5CFF),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                child: const Text('Gunakan Kode Ini'),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Future<void> _kirimUlangKode() async {
-    if (_countdownSeconds > 0 || _isResending) return;
-
-    setState(() => _isResending = true);
-    final random = Random();
-    final newCode = (100000 + random.nextInt(900000)).toString();
-
-    try {
-      final sent = await DatabaseHelper.instance.sendEmailOtp(widget.email);
-      if (!mounted) return;
-      setState(() {
-        _currentOtp = newCode;
-        _otpController.clear();
-        _isResending = false;
-      });
-      _startCountdown();
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            sent
-                ? 'Kode verifikasi baru telah dikirim ke email kamu.'
-                : 'Server email limit. Gunakan kode pengujian: $newCode',
-          ),
-          backgroundColor: const Color(0xFF424242),
-          duration: const Duration(seconds: 4),
-        ),
-      );
-    } catch (e) {
-      if (!mounted) return;
-      setState(() => _isResending = false);
-      final pesan = DatabaseHelper.getFriendlyErrorMessage(e);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(pesan),
-          backgroundColor: const Color(0xFF424242),
-        ),
-      );
-    }
-  }
-
-  Future<void> _verifikasi() async {
-    final inputOtp = _otpController.text.trim();
-
-    if (inputOtp.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Masukkan 6 digit kode verifikasi'),
-          backgroundColor: Color(0xFF424242),
-        ),
-      );
-      return;
-    }
-
-    if (inputOtp.length != 6) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Kode verifikasi harus 6 digit angka'),
-          backgroundColor: Color(0xFF424242),
-        ),
-      );
-      return;
-    }
-
-    setState(() => _isVerifying = true);
-
-    try {
-      final isValid = await DatabaseHelper.instance.verifyEmailOtp(
-        widget.email,
-        inputOtp,
-        _currentOtp,
-      );
-
-      if (!isValid) {
-        if (!mounted) return;
-        setState(() => _isVerifying = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Kode verifikasi salah atau sudah kadaluarsa.'),
-            backgroundColor: Color(0xFF424242),
-          ),
-        );
-        return;
-      }
-
-      if (!mounted) return;
-      setState(() => _isVerifying = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Verifikasi berhasil! Silakan atur kata sandi baru'),
-          backgroundColor: Color(0xFF424242),
-        ),
-      );
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => ResetPasswordPage(email: widget.email),
-        ),
-      );
-    } catch (e) {
-      if (!mounted) return;
-      setState(() => _isVerifying = false);
-      final pesan = DatabaseHelper.getFriendlyErrorMessage(e);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(pesan),
-          backgroundColor: const Color(0xFF424242),
-        ),
-      );
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final primary = Theme.of(context).colorScheme.primary;
-
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () => Navigator.pop(context),
-        ),
-      ),
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                const SizedBox(height: 10),
-                Center(
-                  child: Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: primary.withValues(alpha: 0.1),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      Icons.shield_outlined,
-                      color: primary,
-                      size: 44,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 20),
-                const Text(
-                  'Verifikasi Kode OTP',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 10),
-                Text(
-                  'Kode verifikasi 6 digit telah dikirimkan ke:',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 13.5,
-                    color: Colors.grey.shade600,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  widget.email,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 14.5,
-                    fontWeight: FontWeight.bold,
-                    color: primary,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.access_time_rounded, size: 14, color: Colors.grey.shade500),
-                    const SizedBox(width: 4),
-                    Text(
-                      'Kode berlaku selama 5 menit',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey.shade600,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 28),
-                TextField(
-                  controller: _otpController,
-                  keyboardType: TextInputType.number,
-                  textAlign: TextAlign.center,
-                  maxLength: 6,
-                  style: const TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 12,
-                    color: Colors.black87,
-                  ),
-                  decoration: InputDecoration(
-                    counterText: '',
-                    hintText: '000000',
-                    hintStyle: TextStyle(
-                      color: Colors.grey.shade300,
-                      fontSize: 28,
-                      letterSpacing: 12,
-                    ),
-                    filled: true,
-                    fillColor: const Color(0xFFF2F3F5),
-                    contentPadding: const EdgeInsets.symmetric(vertical: 18),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      borderSide: BorderSide.none,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 24),
-                SizedBox(
-                  height: 50,
-                  child: FilledButton(
-                    onPressed: _isVerifying ? null : _verifikasi,
-                    style: FilledButton.styleFrom(
-                      backgroundColor: primary,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                    ),
-                    child: _isVerifying
-                        ? const SizedBox(
-                            width: 22,
-                            height: 22,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2.2,
-                              color: Colors.white,
-                            ),
-                          )
-                        : const Text(
-                            'Verifikasi',
-                            style: TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                  ),
-                ),
-                const SizedBox(height: 18),
-                Center(
-                  child: _countdownSeconds > 0
-                      ? Text(
-                          'Kirim ulang kode dalam ${_countdownSeconds.toString().padLeft(2, '0')} detik',
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: Colors.grey.shade600,
-                          ),
-                        )
-                      : TextButton.icon(
-                          onPressed: _isResending ? null : _kirimUlangKode,
-                          icon: _isResending
-                              ? const SizedBox(
-                                  width: 14,
-                                  height: 14,
-                                  child: CircularProgressIndicator(strokeWidth: 1.8),
-                                )
-                              : Icon(Icons.refresh_rounded, size: 18, color: primary),
-                          label: Text(
-                            'Kirim Ulang Kode',
-                            style: TextStyle(
-                              color: primary,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 13.5,
-                            ),
-                          ),
-                        ),
-                ),
-                const SizedBox(height: 8),
-                Center(
-                  child: TextButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: Text(
-                      'Salah alamat email? Ubah email',
-                      style: TextStyle(
-                        color: Colors.grey.shade700,
-                        fontSize: 13,
-                        decoration: TextDecoration.underline,
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Center(
-                  child: TextButton.icon(
-                    onPressed: _showBantuanDialog,
-                    icon: const Icon(Icons.help_outline_rounded, size: 16, color: Colors.grey),
-                    label: const Text(
-                      'Belum menerima email? Bantuan Kode',
-                      style: TextStyle(
-                        fontSize: 12.5,
-                        color: Colors.grey,
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 16),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class ResetPasswordPage extends StatefulWidget {
+class NewPasswordPage extends StatefulWidget {
   final String email;
 
-  const ResetPasswordPage({super.key, required this.email});
+  const NewPasswordPage({super.key, required this.email});
 
   @override
-  State<ResetPasswordPage> createState() => _ResetPasswordPageState();
+  State<NewPasswordPage> createState() => _NewPasswordPageState();
 }
 
-class _ResetPasswordPageState extends State<ResetPasswordPage> {
-  final _passwordController = TextEditingController();
+class _NewPasswordPageState extends State<NewPasswordPage> {
+  final _newPasswordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
-
-  bool _obscurePassword = true;
-  bool _obscureConfirmPassword = true;
-  bool _isSaving = false;
+  bool _obscureNew = true;
+  bool _obscureConfirm = true;
+  bool _isLoading = false;
 
   @override
   void dispose() {
-    _passwordController.dispose();
+    _newPasswordController.dispose();
     _confirmPasswordController.dispose();
     super.dispose();
   }
 
-  Future<void> _simpanPasswordBaru() async {
-    final password = _passwordController.text;
+  Future<void> _simpanPassword() async {
+    final newPassword = _newPasswordController.text;
     final confirm = _confirmPasswordController.text;
 
-    if (password.isEmpty || confirm.isEmpty) {
+    if (newPassword.isEmpty || confirm.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Silakan lengkapi kata sandi baru'),
+          content: Text('Silakan masukkan kata sandi baru dan konfirmasi'),
           backgroundColor: Color(0xFF424242),
         ),
       );
       return;
     }
 
-    if (password.length < 6) {
+    if (newPassword.length < 6) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Kata sandi minimal 6 karakter'),
@@ -754,7 +341,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
       return;
     }
 
-    if (password != confirm) {
+    if (newPassword != confirm) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Konfirmasi kata sandi tidak cocok'),
@@ -764,70 +351,36 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
       return;
     }
 
-    setState(() => _isSaving = true);
+    setState(() => _isLoading = true);
 
     try {
-      final success = await DatabaseHelper.instance.updatePassword(
-        widget.email,
-        password,
-      );
-
+      final success = await DatabaseHelper.instance.updatePassword(widget.email, newPassword);
       if (!mounted) return;
-      setState(() => _isSaving = false);
+      setState(() => _isLoading = false);
 
       if (success) {
-        showDialog(
-          context: context,
-          barrierDismissible: false,
-          builder: (dCtx) => AlertDialog(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(18),
-            ),
-            title: const Row(
-              children: [
-                Icon(Icons.check_circle_rounded, color: Colors.green, size: 28),
-                SizedBox(width: 10),
-                Text(
-                  'Berhasil Diperbarui',
-                  style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
-                ),
-              ],
-            ),
-            content: const Text(
-              'Kata sandi akun kamu telah berhasil diubah. Silakan masuk menggunakan kata sandi baru.',
-              style: TextStyle(fontSize: 13.5, height: 1.4),
-            ),
-            actions: [
-              SizedBox(
-                width: double.infinity,
-                child: FilledButton(
-                  onPressed: () {
-                    Navigator.pop(dCtx);
-                    Navigator.of(context).popUntil((route) => route.isFirst);
-                  },
-                  style: FilledButton.styleFrom(
-                    backgroundColor: const Color(0xFF3D5CFF),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  child: const Text('Masuk Sekarang'),
-                ),
-              ),
-            ],
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Kata sandi berhasil diperbarui! Silakan masuk kembali.'),
+            backgroundColor: Color(0xFF424242),
           ),
+        );
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => const LoginPage()),
+          (route) => false,
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Gagal memperbarui kata sandi. Email tidak ditemukan.'),
+            content: Text('Gagal memperbarui kata sandi. Silakan coba lagi.'),
             backgroundColor: Color(0xFF424242),
           ),
         );
       }
     } catch (e) {
       if (!mounted) return;
-      setState(() => _isSaving = false);
+      setState(() => _isLoading = false);
       final pesan = DatabaseHelper.getFriendlyErrorMessage(e);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -838,42 +391,17 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
     }
   }
 
-  Widget _buildTextField({
-    required TextEditingController controller,
-    required IconData icon,
-    required String hint,
-    bool obscureText = false,
-    Widget? suffixIcon,
-  }) {
-    return TextField(
-      controller: controller,
-      obscureText: obscureText,
-      decoration: InputDecoration(
-        prefixIcon: Icon(icon, color: Colors.grey),
-        suffixIcon: suffixIcon,
-        hintText: hint,
-        hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14),
-        filled: true,
-        fillColor: const Color(0xFFF2F3F5),
-        contentPadding: const EdgeInsets.symmetric(vertical: 14),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: BorderSide.none,
-        ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
 
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          icon: const Icon(Icons.arrow_back, color: Colors.black87),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -886,82 +414,121 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
               children: [
                 const SizedBox(height: 10),
                 Center(
-                  child: Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: primary.withValues(alpha: 0.1),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      Icons.lock_reset_rounded,
-                      color: primary,
-                      size: 44,
-                    ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Image.asset(
+                        'assets/logomybookgweh-nobg.png',
+                        height: 80,
+                        fit: BoxFit.contain,
+                        errorBuilder: (_, _, _) => Icon(
+                          Icons.menu_book_rounded,
+                          color: primary,
+                          size: 40,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Image.asset(
+                        'assets/LogoTulisan-nobg.png',
+                        height: 48,
+                        fit: BoxFit.contain,
+                        errorBuilder: (_, _, _) => Text(
+                          'MyBuku',
+                          style: TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                            color: primary,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      Text(
+                        'Kata Sandi Baru',
+                        style: TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.grey.shade900,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Atur kata sandi baru untuk akun\n${widget.email}',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 13.5,
+                          color: Colors.grey.shade600,
+                          height: 1.4,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                const SizedBox(height: 24),
-                const Text(
-                  'Atur Kata Sandi Baru',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Buat kata sandi baru untuk akun:\n${widget.email}',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 13.5,
-                    color: Colors.grey.shade600,
-                    height: 1.45,
-                  ),
-                ),
-                const SizedBox(height: 28),
-                _buildTextField(
-                  controller: _passwordController,
-                  icon: Icons.lock_outline,
-                  hint: 'Masukkan kata sandi baru',
-                  obscureText: _obscurePassword,
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      _obscurePassword ? Icons.visibility_off : Icons.visibility,
-                      color: Colors.grey,
+                const SizedBox(height: 32),
+
+                // Kata Sandi Baru
+                TextField(
+                  controller: _newPasswordController,
+                  obscureText: _obscureNew,
+                  decoration: InputDecoration(
+                    prefixIcon: const Icon(Icons.lock_outline, color: Colors.grey),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        _obscureNew ? Icons.visibility_off : Icons.visibility,
+                        color: Colors.grey,
+                      ),
+                      onPressed: () => setState(() => _obscureNew = !_obscureNew),
                     ),
-                    onPressed: () =>
-                        setState(() => _obscurePassword = !_obscurePassword),
+                    hintText: 'Kata sandi baru (min. 6 karakter)',
+                    hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14),
+                    filled: true,
+                    fillColor: const Color(0xFFF2F3F5),
+                    contentPadding: const EdgeInsets.symmetric(vertical: 14),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14),
+                      borderSide: BorderSide.none,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 14),
-                _buildTextField(
+
+                // Konfirmasi Kata Sandi Baru
+                TextField(
                   controller: _confirmPasswordController,
-                  icon: Icons.lock_outline,
-                  hint: 'Konfirmasi kata sandi baru',
-                  obscureText: _obscureConfirmPassword,
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      _obscureConfirmPassword
-                          ? Icons.visibility_off
-                          : Icons.visibility,
-                      color: Colors.grey,
+                  obscureText: _obscureConfirm,
+                  decoration: InputDecoration(
+                    prefixIcon: const Icon(Icons.lock_outline, color: Colors.grey),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        _obscureConfirm ? Icons.visibility_off : Icons.visibility,
+                        color: Colors.grey,
+                      ),
+                      onPressed: () => setState(() => _obscureConfirm = !_obscureConfirm),
                     ),
-                    onPressed: () => setState(
-                        () => _obscureConfirmPassword = !_obscureConfirmPassword),
+                    hintText: 'Konfirmasi kata sandi baru',
+                    hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14),
+                    filled: true,
+                    fillColor: const Color(0xFFF2F3F5),
+                    contentPadding: const EdgeInsets.symmetric(vertical: 14),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14),
+                      borderSide: BorderSide.none,
+                    ),
                   ),
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 28),
+
+                // Tombol Simpan
                 SizedBox(
                   height: 50,
                   child: FilledButton(
-                    onPressed: _isSaving ? null : _simpanPasswordBaru,
+                    onPressed: _isLoading ? null : _simpanPassword,
                     style: FilledButton.styleFrom(
                       backgroundColor: primary,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(14),
                       ),
                     ),
-                    child: _isSaving
+                    child: _isLoading
                         ? const SizedBox(
                             width: 22,
                             height: 22,
@@ -974,7 +541,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                             'Simpan Kata Sandi',
                             style: TextStyle(
                               fontSize: 15,
-                              fontWeight: FontWeight.w600,
+                              fontWeight: FontWeight.bold,
                             ),
                           ),
                   ),
