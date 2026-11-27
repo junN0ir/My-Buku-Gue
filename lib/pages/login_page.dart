@@ -125,9 +125,9 @@ class _LoginPageState extends State<LoginPage> {
                           height: 56,
                           fit: BoxFit.contain,
                           errorBuilder: (_, _, _) => Text(
-                            'MyBuku',
+                            'My Buku Gue',
                             style: TextStyle(
-                              fontSize: 24,
+                              fontSize: 22,
                               fontWeight: FontWeight.bold,
                               color: primary,
                               letterSpacing: 0.5,

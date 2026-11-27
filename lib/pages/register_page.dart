@@ -161,9 +161,9 @@ class _RegisterPageState extends State<RegisterPage> {
                         height: 48,
                         fit: BoxFit.contain,
                         errorBuilder: (_, _, _) => Text(
-                          'MyBuku',
+                          'My Buku Gue',
                           style: TextStyle(
-                            fontSize: 22,
+                            fontSize: 20,
                             fontWeight: FontWeight.bold,
                             color: primary,
                           ),
@@ -404,7 +404,7 @@ class _RegisterPinPageState extends State<RegisterPinPage> {
       if (success) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Pendaftaran berhasil! Selamat datang di MyBuku.'),
+            content: Text('Pendaftaran berhasil! Selamat datang di My Buku Gue.'),
             backgroundColor: Color(0xFF424242),
           ),
         );
@@ -477,9 +477,9 @@ class _RegisterPinPageState extends State<RegisterPinPage> {
                         height: 48,
                         fit: BoxFit.contain,
                         errorBuilder: (_, _, _) => Text(
-                          'MyBuku',
+                          'My Buku Gue',
                           style: TextStyle(
-                            fontSize: 22,
+                            fontSize: 20,
                             fontWeight: FontWeight.bold,
                             color: primary,
                           ),

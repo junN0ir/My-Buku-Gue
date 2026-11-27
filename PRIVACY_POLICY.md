@@ -1,14 +1,14 @@
-# Kebijakan Privasi (Privacy Policy) - MyBuku
+# Kebijakan Privasi (Privacy Policy) - My Buku Gue
 
 *Terakhir diperbarui: 28 November 2026*
 
-Selamat datang di **MyBuku** ("Aplikasi"). Kami menghormati privasi Anda dan berkomitmen untuk melindungi data pribadi yang Anda bagikan saat menggunakan aplikasi ini. Kebijakan Privasi ini menjelaskan bagaimana kami mengumpulkan, menggunakan, dan melindungi informasi Anda sesuai dengan kebijakan Google Play Store dan undang-undang perlindungan data yang berlaku.
+Selamat datang di **My Buku Gue** ("Aplikasi"). Kami menghormati privasi Anda dan berkomitmen untuk melindungi data pribadi yang Anda bagikan saat menggunakan aplikasi ini. Kebijakan Privasi ini menjelaskan bagaimana kami mengumpulkan, menggunakan, dan melindungi informasi Anda sesuai dengan kebijakan Google Play Store dan undang-undang perlindungan data yang berlaku.
 
 ---
 
 ## 1. Informasi yang Kami Kumpulkan
 
-Aplikasi MyBuku hanya mengumpulkan data yang diperlukan untuk menjalankan fitur-fitur utama aplikasi:
+Aplikasi My Buku Gue hanya mengumpulkan data yang diperlukan untuk menjalankan fitur-fitur utama aplikasi:
 
 1. **Informasi Akun Pengguna:**
    - **Email & Nama:** Saat Anda mendaftar akun, kami menyimpan alamat email dan nama pengguna untuk mengidentifikasi akun Anda dan mengelola koleksi buku favorit Anda.
@@ -62,4 +62,4 @@ Aplikasi ini ditujukan untuk pengguna berusia 13 tahun ke atas. Katalog buku yan
 
 Jika Anda memiliki pertanyaan mengenai Kebijakan Privasi ini atau pengelolaan data Anda, silakan hubungi kami melalui:
 - **Email:** junniormarcellino20@gmail.com
-- **Aplikasi:** MyBuku
+- **Aplikasi:** My Buku Gue

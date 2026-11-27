@@ -72,7 +72,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
         setState(() => _isLoading = false);
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Email tidak terdaftar di sistem MyBuku'),
+            content: Text('Email tidak terdaftar di sistem My Buku Gue'),
             backgroundColor: Color(0xFF424242),
           ),
         );
@@ -153,9 +153,9 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                         height: 48,
                         fit: BoxFit.contain,
                         errorBuilder: (_, _, _) => Text(
-                          'MyBuku',
+                          'My Buku Gue',
                           style: TextStyle(
-                            fontSize: 22,
+                            fontSize: 20,
                             fontWeight: FontWeight.bold,
                             color: primary,
                           ),
@@ -433,9 +433,9 @@ class _NewPasswordPageState extends State<NewPasswordPage> {
                         height: 48,
                         fit: BoxFit.contain,
                         errorBuilder: (_, _, _) => Text(
-                          'MyBuku',
+                          'My Buku Gue',
                           style: TextStyle(
-                            fontSize: 22,
+                            fontSize: 20,
                             fontWeight: FontWeight.bold,
                             color: primary,
                           ),
