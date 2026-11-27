@@ -1,4 +1,4 @@
-# Kebijakan Privasi (Privacy Policy) - My Buku Gue
+# Kebijakan Privasi (Privacy Policy) — My Buku Gue
 
 *Terakhir diperbarui: 28 November 2026*
 
@@ -6,60 +6,66 @@ Selamat datang di **My Buku Gue** ("Aplikasi"). Kami menghormati privasi Anda da
 
 ---
 
-## 1. Informasi yang Kami Kumpulkan
-
-Aplikasi My Buku Gue hanya mengumpulkan data yang diperlukan untuk menjalankan fitur-fitur utama aplikasi:
-
-1. **Informasi Akun Pengguna:**
-   - **Email & Nama:** Saat Anda mendaftar akun, kami menyimpan alamat email dan nama pengguna untuk mengidentifikasi akun Anda dan mengelola koleksi buku favorit Anda.
-   - **Kata Sandi:** Kata sandi akun Anda disimpan secara aman dan terenkripsi, serta tidak pernah dapat dibaca dalam bentuk teks terbuka oleh pihak manapun.
-   - **PIN Keamanan Akun (6 Digit):** Saat mendaftar, Anda menentukan 6 digit PIN keamanan. PIN ini digunakan secara eksklusif untuk verifikasi identitas mandiri ketika Anda mengatur ulang kata sandi (lupa kata sandi).
-
-2. **Data Aktivitas & Preferensi:**
-   - **Buku Favorit:** Daftar buku yang Anda tandai sebagai favorit disimpan di server database agar Anda dapat mengaksesnya kembali di halaman Koleksi di perangkat manapun saat masuk.
-
-3. **Data Teknis & Pengambilan Sampul:**
-   - Aplikasi mengambil informasi metadata dan sampul buku dari API publik (Open Library / Internet Archive). Tidak ada data pribadi Anda yang dikirimkan ke layanan pihak ketiga tersebut saat memuat sampul buku.
+## Ringkasan
+My Buku Gue menghormati privasi Anda. Data akun (email, nama, kata sandi terenkripsi, dan PIN pemulihan 6 digit) hanya digunakan untuk autentikasi dan sinkronisasi daftar buku favorit. Pengguna memiliki kendali penuh dan dapat menghapus akun beserta seluruh data secara permanen kapan saja.
 
 ---
 
-## 2. Penggunaan Informasi
+## 1. Data yang Kami Kumpulkan
+Aplikasi My Buku Gue mengumpulkan informasi seminimal mungkin yang diperlukan untuk menjalankan fitur aplikasi:
 
-Informasi yang dikumpulkan hanya digunakan untuk:
-- Mengautentikasi dan mengelola sesi masuk pengguna (Email & Kata Sandi).
-- Memverifikasi identitas pengguna saat pemulihan kata sandi melalui PIN keamanan 6 digit.
-- Menyimpan dan menyinkronkan daftar buku favorit pengguna.
-- Menampilkan nama pengguna dan status koleksi di halaman Profil.
-
-Kami **TIDAK** menjual, menyewakan, atau membagikan data pribadi Anda kepada pihak ketiga atau jaringan pengiklan mana pun.
+- **Data Akun:** Alamat email, nama tampilan, kata sandi terenkripsi, dan PIN keamanan 6 digit yang Anda daftarkan untuk mengidentifikasi akun Anda dan memulihkan akses saat lupa kata sandi.
+- **Data Favorit:** Daftar ID buku yang Anda tandai sebagai favorit agar tersimpan dan dapat diakses kembali di halaman Koleksi.
 
 ---
 
-## 3. Keamanan Data (Data Security)
+## 2. Izin Aplikasi (Permissions)
+Aplikasi My Buku Gue hanya memerlukan dan menggunakan satu izin sistem:
 
-- Semua komunikasi data antara Aplikasi dan server backend (Supabase) dilindungi menggunakan enkripsi standar industri **HTTPS / TLS**.
-- Kunci API dan akses database diamankan dengan kebijakan *Row Level Security* (RLS).
+- `android.permission.INTERNET`: Digunakan untuk menghubungi server database (Supabase) dan memuat gambar sampul buku dari API publik Open Library.
+
+Aplikasi **TIDAK** meminta izin akses ke:
+- Kamera atau mikrofon,
+- Lokasi perangkat (GPS),
+- Kontak telepon,
+- Penyimpanan eksternal atau file pribadi perangkat.
+
+---
+
+## 3. Keamanan & Penyimpanan Data
+- Semua komunikasi data antara aplikasi My Buku Gue dan server backend dilindungi menggunakan protokol enkripsi standar industri **HTTPS / TLS**.
+- Data disimpan pada infrastruktur cloud Supabase yang aman dengan kebijakan akses berbasis baris (*Row Level Security*).
 - Kredensial akun dan PIN disimpan secara aman dan terlindungi.
 
 ---
 
-## 4. Hak Pengguna & Penghapusan Data (Account Deletion)
+## 4. Hak Pengguna & Penghapusan Akun (Account Deletion)
+Sesuai dengan ketentuan Google Play Store mengenai perlindungan data pengguna:
 
-Sesuai dengan kebijakan Google Play Store mengenai penghapusan akun:
-- **Penghapusan Mandiri di Dalam Aplikasi:** Pengguna dapat menghapus akun dan seluruh data riwayat favorit secara permanen kapan saja melalui menu:
-  `Profil` -> `Hapus Akun Permanen`.
-- **Permintaan Penghapusan Eksternal:** Pengguna juga dapat meminta penghapusan akun dan data melalui email pengembang dengan menyertakan alamat email yang terdaftar.
-
----
-
-## 5. Batasan Usia
-
-Aplikasi ini ditujukan untuk pengguna berusia 13 tahun ke atas. Katalog buku yang tersedia merupakan literatur fiksi, fantasi, sains, biografi, dan literatur umum tanpa konten eksplisit atau materi dewasa.
+- **Penghapusan Mandiri di Aplikasi:** Anda dapat menghapus akun beserta seluruh data riwayat favorit secara instan dan permanen kapan saja melalui menu: `Profil` -> `Hapus Akun Permanen`.
+- **Permintaan Eksternal:** Anda juga dapat meminta penghapusan akun dengan mengirimkan email permohonan ke kontak pengembang kami.
 
 ---
 
-## 6. Kontak Pengembang
+## 5. Pihak Ketiga
+Kami **tidak pernah menjual, menyewakan, atau membagikan** data pribadi Anda kepada pihak ketiga atau pengiklan mana pun. Layanan pihak ketiga yang terintegrasi meliputi:
 
-Jika Anda memiliki pertanyaan mengenai Kebijakan Privasi ini atau pengelolaan data Anda, silakan hubungi kami melalui:
-- **Email:** junniormarcellino20@gmail.com
+- **Supabase:** Sebagai penyedia infrastruktur autentikasi dan database yang aman.
+- **Open Library (Internet Archive):** Digunakan untuk memuat gambar sampul buku publik. Tidak ada data pribadi Anda yang dikirim ke Open Library.
+
+---
+
+## 6. Batasan Usia
+Aplikasi ini ditujukan untuk pengguna berusia 13 tahun ke atas. Katalog buku yang tersedia merupakan literatur fiksi, fantasi, sains, biografi, dan pengetahuan umum tanpa konten dewasa atau materi sensitif.
+
+---
+
+## 7. Perubahan Kebijakan
+Kebijakan privasi ini dapat diperbarui sewaktu-waktu jika terdapat perubahan fitur aplikasi. Pembaruan akan selalu ditampilkan di halaman web ini.
+
+---
+
+## 8. Kontak Pengembang
+Jika Anda memiliki pertanyaan mengenai kebijakan privasi ini atau pengelolaan data Anda, silakan hubungi pengembang melalui:
+- **Email:** `junniormarcellino20@gmail.com`
 - **Aplikasi:** My Buku Gue
